@@ -33,7 +33,7 @@ ARCHIVE LINK....... ONLINE
 C:\> _
 ```
 
-The interface may use DOS-inspired paths such as:
+The interface uses DOS-inspired paths such as:
 
 ```text
 C:\GAMES>        Library
@@ -46,24 +46,54 @@ C:\RANDOM.EXE>   Random game
 
 These are visual and navigational references only — the experience remains mouse, touch and keyboard friendly.
 
+## Current V2 build
+
+The active development branch is **`dev`**. It now contains the first complete RD-8088 interface rebuild:
+
+- responsive mobile / tablet / desktop layout
+- CSS-drawn beige RD-8088 computer hero
+- short boot sequence with reduced-motion support
+- 20-game curated catalog stored separately from the UI
+- search by title, genre, year, developer, publisher and collection
+- genre and year filters
+- persistent favorites and recently played history
+- curated collection cards
+- `RANDOM.EXE` discovery action
+- game detail view with related titles
+- lazy Internet Archive iframe loading only after pressing **Play**
+- browser fullscreen with an arcade-layout fallback
+- keyboard shortcuts (`/`, `F`, `Escape`)
+- automated Node tests for catalog and core behavior
+
+## Run locally
+
+No production build step is required.
+
+```bash
+git checkout dev
+python -m http.server 8080
+```
+
+Then open `http://localhost:8080` in a browser.
+
+Run the automated checks with:
+
+```bash
+npm test
+```
+
 ## Planned features
 
-- Responsive mobile / tablet / desktop interface
-- Retro CRT themes with modern readability
-- Dynamic game catalog
-- Search by title, genre, year, developer and publisher
-- Collections and curated selections
-- Favorites with `localStorage`
-- Recently played history
-- Integrated game player
-- Fullscreen arcade mode
-- Alternative phosphor themes (green / amber / blue)
-- Game detail pages
-- Optional media sections for manuals, magazines and archival material
+- Larger curated catalog (50–100 high-quality entries first)
+- Alternative phosphor themes (amber / blue)
+- Richer game detail metadata and control notes
+- Manuals, magazines and archival media where appropriate
+- Advanced filters and discovery tools
+- Catalog import and validation tooling only after the data model is stable
 
 ## Content architecture
 
-The long-term goal is to keep game metadata separate from the interface so the catalog can grow without turning the frontend into an unmaintainable file.
+Game metadata is intentionally separated from the interface so the catalog can grow without turning the frontend into an unmaintainable file.
 
 Example:
 
@@ -72,8 +102,9 @@ Example:
   title: "Prince of Persia",
   year: 1990,
   genre: "Platform",
-  developer: "Brøderbund / Jordan Mechner",
-  collection: ["DOS Legends"],
+  developer: "Jordan Mechner",
+  publisher: "Broderbund",
+  collections: ["DOS Legends"],
   archiveId: "msdos_Prince_of_Persia_1990"
 }
 ```
@@ -88,9 +119,9 @@ Internet Archive is not affiliated with or responsible for this project.
 
 ## Project status
 
-🚧 **Early development / visual redesign in progress.**
+🚧 **Active development — RD-8088 V2 is available on `dev`.**
 
-The first prototype proved the browser-embed concept. The current focus is the new **RetroDOS Game Computer / RD-8088** visual system and a cleaner catalog architecture before publishing the first proper web build.
+`main` remains the stable project/documentation branch until the V2 interface has been visually reviewed and approved.
 
 ## Inspirations
 
@@ -104,7 +135,7 @@ The project has its own frontend, identity and architecture and does not redistr
 
 **RetroDOS Game Computer** est une bibliothèque web rétro dédiée aux jeux MS-DOS. Le projet prend la forme d'un ordinateur fictif, le **RD-8088**, avec une identité inspirée des vieux PC beige, des écrans CRT et de DOS, tout en conservant une ergonomie moderne.
 
-L'objectif est de construire progressivement une grande bibliothèque navigable et documentée, avec lancement des jeux directement dans la page lorsque des embeds Internet Archive sont disponibles.
+La nouvelle interface V2 est développée sur la branche **`dev`**. Elle intègre déjà la recherche, les filtres, les favoris, l'historique, les collections, les fiches jeux et le lecteur Internet Archive directement dans la page.
 
 ---
 
