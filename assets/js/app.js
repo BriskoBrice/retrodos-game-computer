@@ -1,446 +1,55 @@
-(function () {
+(function(){
   'use strict';
+  const core=window.RetroDOSCore;
+  const games=window.RETRODOS_GAMES||[];
+  const collections=window.RETRODOS_COLLECTIONS||[];
+  if(!core) throw new Error('RetroDOSCore is required');
 
-  const core = window.RetroDOSCore;
-  const games = window.RETRODOS_GAMES || [];
-  const collections = window.RETRODOS_COLLECTIONS || [];
-  if (!core) throw new Error('RetroDOSCore is required');
+  const STORAGE={favorites:'retrodos:favorites:v2',recent:'retrodos:recent:v2',theme:'retrodos:theme:v3',boot:'retrodos:boot:v3'};
+  const state={query:'',genre:'all',year:'all',view:'all',favorites:new Set(readJSON(STORAGE.favorites,[])),recent:readJSON(STORAGE.recent,[]),currentGameId:null,filtered:games.slice(),theme:localStorage.getItem(STORAGE.theme)||'green'};
+  const $=(s)=>document.querySelector(s);
+  const els={body:document.body,libraryView:$('#libraryView'),playerView:$('#playerView'),search:$('#searchInput'),genreFilters:$('#genreFilters'),yearFilter:$('#yearFilter'),featuredRail:$('#featuredRail'),recentRail:$('#recentRail'),recentCount:$('#recentCount'),collectionGrid:$('#collectionGrid'),gameList:$('#gameList'),resultCount:$('#resultCount'),gameCountStat:$('#gameCountStat'),genreCountStat:$('#genreCountStat'),homeButton:$('#homeButton'),mobileHomeButton:$('#mobileHomeButton'),menuButton:$('#menuButton'),menuCloseButton:$('#menuCloseButton'),mobileMenu:$('#mobileMenu'),themeButton:$('#themeButton'),mobileThemeButton:$('#mobileThemeButton'),backButton:$('#backButton'),playerTitle:$('#playerTitle'),playerMeta:$('#playerMeta'),playerDescription:$('#playerDescription'),playerDeveloper:$('#playerDeveloper'),playerPublisher:$('#playerPublisher'),aboutTitle:$('#aboutTitle'),playerFavoriteButton:$('#playerFavoriteButton'),playerShell:$('#playerShell'),playerPoster:$('#playerPoster'),playerPosterImage:$('#playerPosterImage'),posterTitle:$('#posterTitle'),posterPlayButton:$('#posterPlayButton'),playerLoader:$('#playerLoader'),gameFrame:$('#gameFrame'),monitorArchiveId:$('#monitorArchiveId'),focusGameButton:$('#focusGameButton'),gameModeButton:$('#gameModeButton'),fullscreenButton:$('#fullscreenButton'),keyboardToggle:$('#keyboardToggle'),touchKeyboard:$('#touchKeyboard'),touchStatus:$('#touchStatus'),relatedRail:$('#relatedRail'),bootScreen:$('#bootScreen')};
 
-  const STORAGE = {
-    favorites: 'retrodos:favorites:v2',
-    recent: 'retrodos:recent:v2',
-    boot: 'retrodos:boot:v2'
-  };
+  function readJSON(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}}
+  function writeJSON(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch{}}
+  function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+  function gameById(id){return games.find(g=>g.id===id)||null}
+  function initials(title){return title.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+  function imageUrl(game){return core.buildArchiveImageUrl(game)}
+  function imageMarkup(game,altPrefix='Jaquette de'){return `<div class="poster-fallback" hidden>${escapeHtml(initials(game.title))}</div><img src="${escapeHtml(imageUrl(game))}" alt="${altPrefix} ${escapeHtml(game.title)}" data-fallback>`}
+  function attachImageFallbacks(scope){scope.querySelectorAll('img[data-fallback]').forEach(img=>{img.addEventListener('error',()=>{img.hidden=true;const f=img.parentElement?.querySelector('.poster-fallback');if(f)f.hidden=false},{once:true})})}
+  function posterCard(game,action='details'){return `<article class="poster-card"><div class="poster-art">${imageMarkup(game)}</div><div class="poster-copy"><strong>${escapeHtml(game.title)}</strong><span>${game.year} · ${escapeHtml(game.genre)}</span></div><button type="button" data-action="${action}" data-id="${escapeHtml(game.id)}" aria-label="Ouvrir ${escapeHtml(game.title)}"></button></article>`}
 
-  const state = {
-    query: '',
-    genre: 'all',
-    year: 'all',
-    favorites: new Set(readJSON(STORAGE.favorites, [])),
-    recent: readJSON(STORAGE.recent, []),
-    currentGameId: null,
-    view: 'all',
-    filtered: games.slice()
-  };
+  function renderStats(){els.gameCountStat.textContent=String(games.length);els.genreCountStat.textContent=String(new Set(games.map(g=>g.genre)).size)}
+  function renderFilters(){const genres=core.uniqueSorted(games.map(g=>g.genre));els.genreFilters.innerHTML=[`<button class="genre-chip" type="button" data-genre="all" aria-pressed="true">Tous</button>`,...genres.map(genre=>`<button class="genre-chip" type="button" data-genre="${escapeHtml(genre)}" aria-pressed="false">${escapeHtml(genre)}</button>`)].join('');const years=[...new Set(games.map(g=>g.year))].sort((a,b)=>b-a);els.yearFilter.innerHTML=`<option value="all">Toutes les années</option>${years.map(y=>`<option value="${y}">${y}</option>`).join('')}`}
+  function renderFeatured(){const list=games.filter(g=>g.featured).slice(0,10);els.featuredRail.innerHTML=list.map(g=>posterCard(g,'details')).join('');attachImageFallbacks(els.featuredRail)}
+  function renderRecent(){const list=state.recent.map(gameById).filter(Boolean).slice(0,8);els.recentCount.textContent=`${list.length} ${list.length===1?'jeu':'jeux'}`;els.recentRail.innerHTML=list.length?list.map(g=>posterCard(g,'play')).join(''):`<div class="empty-rail"><code>C:\\HISTORY&gt;</code> Aucun jeu lancé pour le moment.</div>`;attachImageFallbacks(els.recentRail)}
+  function renderCollections(){els.collectionGrid.innerHTML=collections.map(c=>{const count=games.filter(g=>(g.collections||[]).includes(c.title)).length;return `<article class="collection-card" data-accent="${escapeHtml(c.accent)}"><small>${escapeHtml(c.prompt)}</small><h3>${escapeHtml(c.title)}</h3><p>${escapeHtml(c.subtitle)}</p><footer><span>${count} JEUX</span><span>OUVRIR ↗</span></footer><button type="button" data-action="collection" data-collection="${escapeHtml(c.title)}" aria-label="Ouvrir ${escapeHtml(c.title)}"></button></article>`}).join('')}
+  function gameCard(game){const favorite=state.favorites.has(game.id);return `<article class="game-card" data-game-id="${escapeHtml(game.id)}"><div class="game-art">${imageMarkup(game)}<button class="favorite-mini" type="button" data-action="favorite" data-id="${escapeHtml(game.id)}" aria-label="${favorite?'Retirer':'Ajouter'} ${escapeHtml(game.title)} ${favorite?'des':'aux'} favoris" aria-pressed="${favorite}">${favorite?'★':'☆'}</button></div><div class="game-copy"><div class="game-kicker"><span class="genre">${escapeHtml(game.genre)}</span><span>·</span><span>${game.year}</span></div><h3>${escapeHtml(game.title)}</h3><p>${escapeHtml(game.developer)}</p></div><div class="card-actions"><button class="card-play" type="button" data-action="play" data-id="${escapeHtml(game.id)}">▶ Jouer</button><button class="card-details" type="button" data-action="details" data-id="${escapeHtml(game.id)}">Fiche</button></div></article>`}
+  function renderLibrary(){const list=state.filtered;els.resultCount.textContent=`${list.length} résultat${list.length>1?'s':''}`;els.gameList.innerHTML=list.length?list.map(gameCard).join(''):`<div class="no-results">NO MATCH FOUND · essaie un autre titre, genre ou année.</div>`;attachImageFallbacks(els.gameList)}
+  function applyFilters(){state.filtered=core.selectVisibleGames(games,{query:state.query,genre:state.genre,year:state.year},state.view,state.favorites);renderLibrary()}
 
-  const els = {
-    body: document.body,
-    libraryView: document.querySelector('#libraryView'),
-    playerView: document.querySelector('#playerView'),
-    search: document.querySelector('#searchInput'),
-    genreFilters: document.querySelector('#genreFilters'),
-    yearFilter: document.querySelector('#yearFilter'),
-    recentRail: document.querySelector('#recentRail'),
-    recentCount: document.querySelector('#recentCount'),
-    collectionGrid: document.querySelector('#collectionGrid'),
-    gameList: document.querySelector('#gameList'),
-    resultCount: document.querySelector('#resultCount'),
-    gameCountStat: document.querySelector('#gameCountStat'),
-    genreCountStat: document.querySelector('#genreCountStat'),
-    homeButton: document.querySelector('#homeButton'),
-    helpButton: document.querySelector('#helpButton'),
-    helpDialog: document.querySelector('#helpDialog'),
-    menuButton: document.querySelector('#menuButton'),
-    menuCloseButton: document.querySelector('#menuCloseButton'),
-    systemMenu: document.querySelector('#systemMenu'),
-    backButton: document.querySelector('#backButton'),
-    fullscreenButton: document.querySelector('#fullscreenButton'),
-    playerFavoriteButton: document.querySelector('#playerFavoriteButton'),
-    playerTitle: document.querySelector('#playerTitle'),
-    playerMeta: document.querySelector('#playerMeta'),
-    playerDescription: document.querySelector('#playerDescription'),
-    playerDeveloper: document.querySelector('#playerDeveloper'),
-    playerPublisher: document.querySelector('#playerPublisher'),
-    aboutTitle: document.querySelector('#aboutTitle'),
-    gameFrame: document.querySelector('#gameFrame'),
-    playerMonitor: document.querySelector('#playerMonitor'),
-    playerPoster: document.querySelector('#playerPoster'),
-    playerPosterImage: document.querySelector('#playerPosterImage'),
-    posterTitle: document.querySelector('#posterTitle'),
-    posterPlayButton: document.querySelector('#posterPlayButton'),
-    playerLoader: document.querySelector('#playerLoader'),
-    monitorArchiveId: document.querySelector('#monitorArchiveId'),
-    relatedRail: document.querySelector('#relatedRail')
-  };
-
-  function readJSON(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function writeJSON(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-  }
-
-  function gameById(id) {
-    return games.find((game) => game.id === id) || null;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  function fallbackText(title) {
-    return title.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
-  }
-
-  function attachImageFallbacks(scope) {
-    scope.querySelectorAll('img[data-fallback]').forEach((img) => {
-      img.addEventListener('error', () => {
-        img.hidden = true;
-        const fallback = img.parentElement?.querySelector('.image-fallback');
-        if (fallback) fallback.hidden = false;
-      }, { once: true });
-    });
-  }
-
-  function renderStats() {
-    els.gameCountStat.textContent = String(games.length);
-    els.genreCountStat.textContent = String(new Set(games.map((game) => game.genre)).size);
-  }
-
-  function renderFilters() {
-    const genres = core.uniqueSorted(games.map((game) => game.genre));
-    els.genreFilters.innerHTML = [
-      `<button class="filter-chip" type="button" data-genre="all" aria-pressed="true">Tous</button>`,
-      ...genres.map((genre) => `<button class="filter-chip" type="button" data-genre="${escapeHtml(genre)}" aria-pressed="false">${escapeHtml(genre)}</button>`)
-    ].join('');
-
-    const years = [...new Set(games.map((game) => game.year))].sort((a, b) => b - a);
-    els.yearFilter.innerHTML = `<option value="all">Toutes les années</option>${years.map((year) => `<option value="${year}">${year}</option>`).join('')}`;
-  }
-
-  function miniCard(game, action = 'details') {
-    const image = core.buildArchiveImageUrl(game);
-    return `
-      <article class="mini-card">
-        <button type="button" data-action="${action}" data-id="${escapeHtml(game.id)}" aria-label="Ouvrir ${escapeHtml(game.title)}">
-          <div class="mini-art">
-            <div class="image-fallback" hidden>${escapeHtml(fallbackText(game.title))}</div>
-            <img src="${escapeHtml(image)}" alt="Aperçu de ${escapeHtml(game.title)}" data-fallback>
-          </div>
-          <div class="mini-copy">
-            <strong>${escapeHtml(game.title)}</strong>
-            <span>${game.year} · ${escapeHtml(game.genre)}</span>
-          </div>
-        </button>
-      </article>`;
-  }
-
-  function renderRecent() {
-    const recentGames = state.recent.map(gameById).filter(Boolean).slice(0, 8);
-    els.recentCount.textContent = `${recentGames.length} ${recentGames.length > 1 ? 'jeux' : 'jeu'}`;
-    if (!recentGames.length) {
-      els.recentRail.innerHTML = `<div class="empty-rail"><code>C:\\HISTORY&gt;</code><span>Aucun jeu lancé pour le moment. Choisis un classique dans la bibliothèque.</span></div>`;
-      return;
-    }
-    els.recentRail.innerHTML = recentGames.map((game) => miniCard(game, 'play')).join('');
-    attachImageFallbacks(els.recentRail);
-  }
-
-  function renderCollections() {
-    els.collectionGrid.innerHTML = collections.map((collection) => {
-      const count = games.filter((game) => game.collections.includes(collection.title)).length;
-      const icon = collection.id === 'fps-90s' ? 'F9' : collection.id === 'point-click' ? 'P&C' : 'DOS';
-      return `
-        <article class="collection-card" data-accent="${escapeHtml(collection.accent)}">
-          <div class="collection-icon">${escapeHtml(icon)}</div>
-          <span class="section-prompt">${escapeHtml(collection.prompt)}</span>
-          <h3>${escapeHtml(collection.title)}</h3>
-          <p>${escapeHtml(collection.subtitle)}</p>
-          <footer><span>${count} JEUX</span><span>OUVRIR ↗</span></footer>
-          <button type="button" data-action="collection" data-collection="${escapeHtml(collection.title)}" aria-label="Ouvrir la collection ${escapeHtml(collection.title)}"></button>
-        </article>`;
-    }).join('');
-  }
-
-  function gameCard(game) {
-    const favorite = state.favorites.has(game.id);
-    const image = core.buildArchiveImageUrl(game);
-    return `
-      <article class="game-card" data-game-id="${escapeHtml(game.id)}">
-        <div class="game-art">
-          <div class="image-fallback" hidden>${escapeHtml(fallbackText(game.title))}</div>
-          <img src="${escapeHtml(image)}" alt="Aperçu de ${escapeHtml(game.title)}" data-fallback>
-        </div>
-        <div class="game-copy">
-          <div class="game-kicker"><span class="genre">${escapeHtml(game.genre)}</span><span>•</span><span>${game.year}</span><span>•</span><span>${escapeHtml(game.developer)}</span></div>
-          <h3>${escapeHtml(game.title)}</h3>
-          <p>${escapeHtml(game.description)}</p>
-        </div>
-        <div class="game-actions">
-          <button class="favorite-button" type="button" data-action="favorite" data-id="${escapeHtml(game.id)}" aria-label="${favorite ? 'Retirer' : 'Ajouter'} ${escapeHtml(game.title)} ${favorite ? 'des' : 'aux'} favoris" aria-pressed="${favorite}">${favorite ? '★' : '☆'}</button>
-          <button class="primary-button" type="button" data-action="play" data-id="${escapeHtml(game.id)}">▶ Jouer</button>
-          <button class="secondary-button" type="button" data-action="details" data-id="${escapeHtml(game.id)}">Fiche</button>
-        </div>
-      </article>`;
-  }
-
-  function renderLibrary() {
-    const list = state.filtered;
-    els.resultCount.textContent = `${list.length} résultat${list.length > 1 ? 's' : ''}`;
-    if (!list.length) {
-      els.gameList.innerHTML = `<div class="no-results"><strong>NO MATCH FOUND</strong>Essaie un autre titre, genre ou une autre année.</div>`;
-      return;
-    }
-    els.gameList.innerHTML = list.map(gameCard).join('');
-    attachImageFallbacks(els.gameList);
-  }
-
-  function applyFilters() {
-    state.filtered = core.selectVisibleGames(
-      games,
-      { query: state.query, genre: state.genre, year: state.year },
-      state.view,
-      state.favorites
-    );
-    renderLibrary();
-  }
-
-  function toggleFavorite(id) {
-    if (!gameById(id)) return;
-    if (state.favorites.has(id)) state.favorites.delete(id);
-    else state.favorites.add(id);
-    writeJSON(STORAGE.favorites, [...state.favorites]);
-    applyFilters();
-    if (state.currentGameId === id) updatePlayerFavorite();
-  }
-
-  function markRecent(id) {
-    state.recent = [id, ...state.recent.filter((gameId) => gameId !== id)].slice(0, 8);
-    writeJSON(STORAGE.recent, state.recent);
-    renderRecent();
-  }
-
-  function updatePlayerFavorite() {
-    const game = gameById(state.currentGameId);
-    if (!game) return;
-    const favorite = state.favorites.has(game.id);
-    els.playerFavoriteButton.textContent = favorite ? '★' : '☆';
-    els.playerFavoriteButton.setAttribute('aria-pressed', String(favorite));
-    els.playerFavoriteButton.setAttribute('aria-label', favorite ? 'Retirer des favoris' : 'Ajouter aux favoris');
-  }
-
-  function renderRelated(game) {
-    const related = games
-      .filter((candidate) => candidate.id !== game.id)
-      .map((candidate) => ({
-        candidate,
-        score: Number(candidate.genre === game.genre) * 3 + candidate.collections.filter((name) => game.collections.includes(name)).length
-      }))
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score || b.candidate.year - a.candidate.year)
-      .slice(0, 3)
-      .map((item) => item.candidate);
-    els.relatedRail.innerHTML = related.map((item) => miniCard(item, 'details')).join('');
-    attachImageFallbacks(els.relatedRail);
-  }
-
-  function resetPlayerFrame() {
-    els.gameFrame.removeAttribute('src');
-    els.gameFrame.hidden = true;
-    els.playerLoader.hidden = true;
-    els.playerPoster.hidden = false;
-  }
-
-  function openGame(id, { play = false } = {}) {
-    const game = gameById(id);
-    if (!game) return;
-    state.currentGameId = id;
-    resetPlayerFrame();
-    els.playerTitle.textContent = game.title;
-    els.playerMeta.textContent = `${game.year} · ${game.genre} · ${game.collections[0] || 'DOS'}`;
-    els.playerDescription.textContent = game.description;
-    els.playerDeveloper.textContent = game.developer || '—';
-    els.playerPublisher.textContent = game.publisher || '—';
-    els.aboutTitle.textContent = `À propos de ${game.title}`;
-    els.monitorArchiveId.textContent = game.archiveId || 'NO_ARCHIVE_ID';
-    els.posterTitle.textContent = game.title;
-    els.playerPosterImage.src = core.buildArchiveImageUrl(game);
-    els.playerPosterImage.alt = `Aperçu de ${game.title}`;
-    els.playerPosterImage.onerror = () => { els.playerPosterImage.style.display = 'none'; };
-    updatePlayerFavorite();
-    renderRelated(game);
-    els.libraryView.hidden = true;
-    els.playerView.hidden = false;
-    document.title = `${game.title} — RetroDOS Game Computer`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (play) launchCurrentGame();
-  }
-
-  function closeGame() {
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    els.playerView.classList.remove('is-arcade');
-    resetPlayerFrame();
-    state.currentGameId = null;
-    els.playerView.hidden = true;
-    els.libraryView.hidden = false;
-    document.title = 'RetroDOS Game Computer — RD-8088';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function launchCurrentGame() {
-    const game = gameById(state.currentGameId);
-    if (!game || !game.archiveId) return;
-    markRecent(game.id);
-    els.playerPoster.hidden = true;
-    els.playerLoader.hidden = false;
-    els.gameFrame.hidden = false;
-    els.gameFrame.src = core.buildArchiveEmbedUrl(game);
-  }
-
-  function togglePlayerFullscreen() {
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.();
-      return;
-    }
-    if (els.playerMonitor.requestFullscreen) {
-      els.playerMonitor.requestFullscreen().catch(() => els.playerView.classList.toggle('is-arcade'));
-    } else {
-      els.playerView.classList.toggle('is-arcade');
-    }
-  }
-
-  function openMenu() {
-    els.systemMenu.classList.add('is-open');
-    els.systemMenu.setAttribute('aria-hidden', 'false');
-    els.menuButton.setAttribute('aria-expanded', 'true');
-    els.systemMenu.inert = false;
-  }
-
-  function closeMenu() {
-    els.systemMenu.classList.remove('is-open');
-    els.systemMenu.setAttribute('aria-hidden', 'true');
-    els.menuButton.setAttribute('aria-expanded', 'false');
-    els.systemMenu.inert = true;
-  }
-
-  function scrollToSection(id) {
-    closeGame();
-    requestAnimationFrame(() => document.querySelector(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  }
-
-  function navigate(action) {
-    closeMenu();
-    if (action === 'library') {
-      state.view = 'all';
-      applyFilters();
-      return scrollToSection('#librarySection');
-    }
-    if (action === 'collections') return scrollToSection('#collectionsSection');
-    if (action === 'history') return scrollToSection('#recentSection');
-    if (action === 'favorites') {
-      closeGame();
-      state.query = '';
-      state.genre = 'all';
-      state.year = 'all';
-      state.view = 'favorites';
-      els.search.value = '';
-      els.yearFilter.value = 'all';
-      applyFilters();
-      els.genreFilters.querySelectorAll('[data-genre]').forEach((button) => button.setAttribute('aria-pressed', button.dataset.genre === 'all' ? 'true' : 'false'));
-      return requestAnimationFrame(() => document.querySelector('#librarySection')?.scrollIntoView({ behavior: 'smooth' }));
-    }
-    if (action === 'random') {
-      const pool = state.filtered.length ? state.filtered : games;
-      const game = pool[Math.floor(Math.random() * pool.length)];
-      if (game) openGame(game.id);
-    }
-  }
-
-  function boot() {
-    let alreadyBooted = false;
-    try { alreadyBooted = sessionStorage.getItem(STORAGE.boot) === '1'; } catch {}
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const delay = alreadyBooted || reduceMotion ? 30 : 1050;
-    setTimeout(() => {
-      els.body.classList.remove('is-booting');
-      try { sessionStorage.setItem(STORAGE.boot, '1'); } catch {}
-    }, delay);
-  }
-
-  els.search.addEventListener('input', (event) => {
-    state.query = event.target.value;
-    state.view = 'all';
-    applyFilters();
-  });
-
-  els.yearFilter.addEventListener('change', (event) => {
-    state.year = event.target.value;
-    state.view = 'all';
-    applyFilters();
-  });
-
-  els.genreFilters.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-genre]');
-    if (!button) return;
-    state.genre = button.dataset.genre;
-    state.view = 'all';
-    els.genreFilters.querySelectorAll('[data-genre]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-    applyFilters();
-  });
-
-  document.addEventListener('click', (event) => {
-    const actionTarget = event.target.closest('[data-action], [data-nav]');
-    if (!actionTarget) return;
-    const action = actionTarget.dataset.action;
-    const nav = actionTarget.dataset.nav;
-    const id = actionTarget.dataset.id;
-    if (nav) return navigate(nav);
-    if (action === 'favorite') return toggleFavorite(id);
-    if (action === 'play') return openGame(id, { play: true });
-    if (action === 'details') return openGame(id);
-    if (action === 'collection') {
-      state.query = actionTarget.dataset.collection || '';
-      state.view = 'all';
-      els.search.value = state.query;
-      applyFilters();
-      document.querySelector('#librarySection')?.scrollIntoView({ behavior: 'smooth' });
-    }
-  });
-
-  els.homeButton.addEventListener('click', () => navigate('library'));
-  els.helpButton.addEventListener('click', () => els.helpDialog.showModal?.());
-  els.menuButton.addEventListener('click', openMenu);
-  els.menuCloseButton.addEventListener('click', closeMenu);
-  els.systemMenu.addEventListener('click', (event) => { if (event.target === els.systemMenu) closeMenu(); });
-  els.backButton.addEventListener('click', closeGame);
-  els.posterPlayButton.addEventListener('click', launchCurrentGame);
-  els.playerFavoriteButton.addEventListener('click', () => toggleFavorite(state.currentGameId));
-  els.fullscreenButton.addEventListener('click', togglePlayerFullscreen);
-  els.gameFrame.addEventListener('load', () => { if (els.gameFrame.getAttribute('src')) els.playerLoader.hidden = true; });
-
-  document.addEventListener('keydown', (event) => {
-    const tag = document.activeElement?.tagName;
-    const editing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-    if (event.key === 'Escape') {
-      if (els.systemMenu.classList.contains('is-open')) return closeMenu();
-      if (!els.playerView.hidden && !document.fullscreenElement) return closeGame();
-    }
-    if (editing) return;
-    if (event.key === '/' && els.playerView.hidden) {
-      event.preventDefault();
-      els.search.focus();
-    }
-    if (event.key.toLowerCase() === 'f' && !els.playerView.hidden) {
-      event.preventDefault();
-      togglePlayerFullscreen();
-    }
-  });
-
-  renderStats();
-  renderFilters();
-  renderRecent();
-  renderCollections();
-  renderLibrary();
-  boot();
+  function toggleFavorite(id){if(!gameById(id))return;state.favorites.has(id)?state.favorites.delete(id):state.favorites.add(id);writeJSON(STORAGE.favorites,[...state.favorites]);applyFilters();if(state.currentGameId===id)updatePlayerFavorite()}
+  function markRecent(id){state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,8);writeJSON(STORAGE.recent,state.recent);renderRecent()}
+  function updatePlayerFavorite(){const game=gameById(state.currentGameId);if(!game)return;const favorite=state.favorites.has(game.id);els.playerFavoriteButton.textContent=favorite?'★':'☆';els.playerFavoriteButton.setAttribute('aria-pressed',String(favorite));els.playerFavoriteButton.setAttribute('aria-label',favorite?'Retirer des favoris':'Ajouter aux favoris')}
+  function renderRelated(game){const related=games.filter(g=>g.id!==game.id).map(candidate=>({candidate,score:Number(candidate.genre===game.genre)*3+(candidate.collections||[]).filter(c=>(game.collections||[]).includes(c)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||b.candidate.year-a.candidate.year).slice(0,5).map(x=>x.candidate);els.relatedRail.innerHTML=related.map(g=>posterCard(g,'details')).join('');attachImageFallbacks(els.relatedRail)}
+  function resetPlayer(){els.gameFrame.removeAttribute('src');els.gameFrame.hidden=true;els.playerLoader.hidden=true;els.playerPoster.hidden=false;els.touchKeyboard.hidden=true;els.keyboardToggle.setAttribute('aria-expanded','false');els.touchStatus.textContent='Appuie d’abord sur « Focus jeu ». Le clavier intégré reste expérimental avec les iframes Archive.'}
+  function openGame(id,{play=false}={}){const game=gameById(id);if(!game)return;state.currentGameId=id;resetPlayer();els.playerTitle.textContent=game.title;els.playerMeta.textContent=`${game.year} · ${game.genre} · ${(game.collections||[])[0]||'DOS'}`;els.playerDescription.textContent=game.description;els.playerDeveloper.textContent=game.developer||'—';els.playerPublisher.textContent=game.publisher||'—';els.aboutTitle.textContent=`À propos de ${game.title}`;els.monitorArchiveId.textContent=game.archiveId||'NO_ARCHIVE_ID';els.posterTitle.textContent=game.title;els.playerPosterImage.hidden=false;els.playerPosterImage.src=imageUrl(game);els.playerPosterImage.alt=`Jaquette de ${game.title}`;els.playerPosterImage.onerror=()=>{els.playerPosterImage.hidden=true};updatePlayerFavorite();renderRelated(game);els.libraryView.hidden=true;els.playerView.hidden=false;document.title=`${game.title} — RetroDOS`;window.scrollTo({top:0,behavior:'smooth'});if(play)launchCurrentGame()}
+  function closeGame(){if(document.fullscreenElement)document.exitFullscreen?.().catch?.(()=>{});resetPlayer();state.currentGameId=null;els.playerView.hidden=true;els.libraryView.hidden=false;document.title='RetroDOS Game Computer — RD-8088';window.scrollTo({top:0,behavior:'smooth'})}
+  function launchCurrentGame(){const game=gameById(state.currentGameId);if(!game?.archiveId)return;markRecent(game.id);els.playerPoster.hidden=true;els.playerLoader.hidden=false;els.gameFrame.hidden=false;els.gameFrame.src=core.buildArchiveEmbedUrl(game);els.gameFrame.addEventListener('load',()=>{els.playerLoader.hidden=true;focusGame()},{once:true})}
+  function focusGame(){try{els.gameFrame.contentWindow?.focus()}catch{};els.gameFrame.focus?.();els.touchStatus.textContent='Focus envoyé au lecteur. Si le jeu ne répond pas, touche directement son écran une fois.'}
+  async function toggleFullscreen(){try{if(document.fullscreenElement){await document.exitFullscreen();return}await els.playerShell.requestFullscreen?.()}catch{}}
+  async function enterGameMode(){try{if(!document.fullscreenElement)await els.playerShell.requestFullscreen?.();if(screen.orientation?.lock)await screen.orientation.lock('landscape')}catch{}finally{focusGame();els.touchStatus.textContent='Mode jeu demandé : plein écran + paysage quand le navigateur l’autorise.'}}
+  function toggleKeyboard(){const open=els.touchKeyboard.hidden;els.touchKeyboard.hidden=!open;els.keyboardToggle.setAttribute('aria-expanded',String(open))}
+  function attemptVirtualKey(key,button){focusGame();button.classList.add('is-pressed');setTimeout(()=>button.classList.remove('is-pressed'),140);try{els.gameFrame.contentWindow?.postMessage({source:'retrodos',type:'virtual-key',key},'https://archive.org')}catch{}els.touchStatus.textContent=`Tentative tactile : ${key}. L’embed Internet Archive peut ignorer cette touche.`}
+  function setTheme(theme){state.theme=theme==='amber'?'amber':'green';els.body.dataset.theme=state.theme;try{localStorage.setItem(STORAGE.theme,state.theme)}catch{};document.querySelector('meta[name="theme-color"]')?.setAttribute('content',state.theme==='amber'?'#0b0803':'#070907')}
+  function toggleTheme(){setTheme(state.theme==='green'?'amber':'green')}
+  function openMenu(){els.mobileMenu.classList.add('is-open');els.mobileMenu.setAttribute('aria-hidden','false');els.mobileMenu.inert=false}
+  function closeMenu(){els.mobileMenu.classList.remove('is-open');els.mobileMenu.setAttribute('aria-hidden','true');els.mobileMenu.inert=true}
+  function scrollToSection(selector){closeGame();requestAnimationFrame(()=>document.querySelector(selector)?.scrollIntoView({behavior:'smooth',block:'start'}))}
+  function navigate(action){closeMenu();if(action==='home'){state.view='all';applyFilters();return scrollToSection('#homeSection')}if(action==='library'){state.view='all';applyFilters();return scrollToSection('#librarySection')}if(action==='collections')return scrollToSection('#collectionsSection');if(action==='history')return scrollToSection('#recentSection');if(action==='favorites'){closeGame();state.query='';state.genre='all';state.year='all';state.view='favorites';els.search.value='';els.yearFilter.value='all';els.genreFilters.querySelectorAll('[data-genre]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.genre==='all')));applyFilters();return requestAnimationFrame(()=>$('#librarySection')?.scrollIntoView({behavior:'smooth'}))}if(action==='random'){const pool=state.filtered.length?state.filtered:games;const game=pool[Math.floor(Math.random()*pool.length)];if(game)openGame(game.id)}}
+  function handleAction(target){const action=target.dataset.action;if(!action)return;const id=target.dataset.id;if(action==='favorite')toggleFavorite(id);if(action==='play')openGame(id,{play:true});if(action==='details')openGame(id);if(action==='collection'){state.view='all';state.query=target.dataset.collection||'';state.genre='all';state.year='all';els.search.value=state.query;els.yearFilter.value='all';els.genreFilters.querySelectorAll('[data-genre]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.genre==='all')));applyFilters();scrollToSection('#librarySection')}}
+  function boot(){setTheme(state.theme);const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let seen=false;try{seen=sessionStorage.getItem(STORAGE.boot)==='1';sessionStorage.setItem(STORAGE.boot,'1')}catch{};const delay=reduced?0:(seen?420:1050);setTimeout(()=>{els.bootScreen.classList.add('is-done');els.body.classList.remove('is-booting')},delay)}
+  function bind(){document.addEventListener('click',event=>{const nav=event.target.closest('[data-nav]');if(nav)return navigate(nav.dataset.nav);const action=event.target.closest('[data-action]');if(action)return handleAction(action)});els.search.addEventListener('input',()=>{state.query=els.search.value.trim();state.view='all';applyFilters()});els.genreFilters.addEventListener('click',event=>{const button=event.target.closest('[data-genre]');if(!button)return;state.genre=button.dataset.genre;state.view='all';els.genreFilters.querySelectorAll('[data-genre]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));applyFilters()});els.yearFilter.addEventListener('change',()=>{state.year=els.yearFilter.value;state.view='all';applyFilters()});els.homeButton?.addEventListener('click',()=>navigate('home'));els.mobileHomeButton?.addEventListener('click',()=>navigate('home'));els.menuButton?.addEventListener('click',openMenu);els.menuCloseButton?.addEventListener('click',closeMenu);els.mobileMenu?.addEventListener('click',e=>{if(e.target===els.mobileMenu)closeMenu()});els.themeButton?.addEventListener('click',toggleTheme);els.mobileThemeButton?.addEventListener('click',toggleTheme);els.backButton.addEventListener('click',closeGame);els.playerFavoriteButton.addEventListener('click',()=>toggleFavorite(state.currentGameId));els.posterPlayButton.addEventListener('click',launchCurrentGame);els.focusGameButton.addEventListener('click',focusGame);els.fullscreenButton.addEventListener('click',toggleFullscreen);els.gameModeButton.addEventListener('click',enterGameMode);els.keyboardToggle.addEventListener('click',toggleKeyboard);els.touchKeyboard.addEventListener('click',event=>{const button=event.target.closest('[data-key]');if(button)attemptVirtualKey(button.dataset.key,button)});document.addEventListener('keydown',event=>{if(event.key==='/'&&els.playerView.hidden&&!/input|textarea|select/i.test(document.activeElement?.tagName||'')){event.preventDefault();els.search.focus()}if(event.key==='Escape'&&!els.playerView.hidden)closeGame();if((event.key==='f'||event.key==='F')&&!els.playerView.hidden&&!/input|textarea/i.test(document.activeElement?.tagName||'')){event.preventDefault();toggleFullscreen()}})}
+  renderStats();renderFilters();renderFeatured();renderRecent();renderCollections();applyFilters();bind();boot();
 })();
