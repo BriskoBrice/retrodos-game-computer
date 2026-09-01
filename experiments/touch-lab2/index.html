@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#020504">
+  <meta name="robots" content="noindex,nofollow">
+  <title>RetroDOS Touch Lab 2 — DOOM</title>
+  <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+</head>
+<body>
+  <main class="lab" id="lab">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">RD</span><span><b>RetroDOS</b><small>TOUCH LAB 2 // RD-8088</small></span></div>
+      <div class="runtime-status"><i></i><span id="statusText">PRÊT</span></div>
+      <button class="mode-button" id="gameModeBtn" type="button">MODE JEU</button>
+    </header>
+    <section class="player-shell" id="playerShell">
+      <div class="screen-stage" id="screenStage">
+        <div id="dos" class="dos-host" aria-label="Écran DOOM"></div>
+        <div id="bootOverlay" class="boot-overlay">
+          <div class="crt-loader">
+            <div class="loader-kicker">RETRODOS GAME COMPUTER</div><div class="loader-machine">RD-8088</div>
+            <div class="loader-game">DOOM // SHAREWARE // TOUCH PROFILE</div>
+            <div class="boot-grid">
+              <div><span>SYSTEM CHECK</span><b>OK</b></div><div><span>GAME DATA</span><b id="dataState">0%</b></div>
+              <div><span>DOS ENGINE</span><b id="engineState">WAIT</b></div><div><span>TOUCH MAP</span><b id="inputState">WAIT</b></div>
+            </div>
+            <div class="download-meta"><span id="downloadLabel">Prêt à charger.</span><span id="downloadBytes"></span></div>
+            <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+            <div id="bootCommand" class="boot-command">C:\RETRODOS&gt; LOAD DOOM</div>
+            <button id="startBtn" class="load-button" type="button">CHARGER DOOM</button>
+            <div id="bootError" class="boot-error" hidden></div>
+          </div>
+        </div>
+        <div class="game-hud" id="gameHud" aria-label="Commandes RetroDOS">
+          <div class="weapon-dock" id="weaponDock"><span>ARMES</span><button data-tap="49">1</button><button data-tap="50">2</button><button data-tap="51">3</button><button data-tap="52">4</button><button data-tap="53">5</button><button data-tap="54">6</button><button data-tap="55">7</button></div>
+          <div class="left-rail"><div class="joystick" id="joystick" role="application" aria-label="Joystick de déplacement"><div class="joystick-cross"></div><div class="joystick-knob" id="joystickKnob"><span>RD</span></div></div></div>
+          <div class="right-rail"><button class="touch-action fire" data-action="fire"><b>FIRE</b><small>CTRL</small></button><button class="touch-action use" data-action="use"><b>USE</b><small>SPACE</small></button><button class="touch-action run" data-action="run"><b>RUN</b><small>SHIFT</small></button><button class="touch-action strafe" data-action="strafe"><b>STRAFE</b><small>ALT</small></button></div>
+          <button class="hud-menu-button" id="hudMenuBtn" type="button" aria-expanded="false">•••</button>
+          <div class="hud-menu" id="hudMenu" hidden><button data-tap="256">ESC</button><button data-tap="257">ENTER</button><button id="saveBtn" type="button">SAVE</button><button id="muteBtn" type="button">SON ON</button><button id="hideHudBtn" type="button">MASQUER</button><button id="exitModeBtn" type="button">QUITTER MODE JEU</button></div>
+          <button id="showHudBtn" class="show-hud" type="button" hidden>🎮</button>
+        </div>
+      </div>
+      <section class="portrait-console" id="portraitConsole">
+        <div class="portrait-head"><div><span>PROFIL</span><b>FPS TOUCH</b></div><div><span>MAPPING</span><b id="mappingSource">EN ATTENTE</b></div><button id="portraitModeBtn" type="button">PAYSAGE ↗</button></div>
+        <div class="portrait-controls"><div class="portrait-joystick-slot" id="portraitJoystickSlot"></div><div class="portrait-actions-slot" id="portraitActionsSlot"></div></div>
+        <div class="portrait-weapons-slot" id="portraitWeaponsSlot"></div>
+        <div class="portrait-tools"><button data-tap="256">ESC</button><button data-tap="257">ENTER</button><button id="portraitSaveBtn" type="button">SAUVEGARDER</button><button id="portraitMuteBtn" type="button">SON ON</button></div>
+      </section>
+    </section>
+    <section class="lab-note"><p><b>Touch Lab 2.</b> RetroDOS lit le mapping tactile du bundle js-dos quand il existe, masque son interface grise et réutilise les mêmes vraies entrées dans un contrôleur RetroDOS. Sinon, un profil FPS générique prend le relais.</p></section>
+  </main>
+  <script src="./controls-core.js"></script><script src="./app.js"></script>
+</body>
+</html>
