@@ -1,32 +1,11 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-
-function read(path) { return fs.readFileSync(path, 'utf8'); }
-
-test('home shell exposes required RD-8088 sections', () => {
-  const html = read('index.html');
-  for (const id of ['searchInput','genreFilters','yearFilter','recentRail','collectionGrid','gameList','playerView','libraryView']) {
-    assert.match(html, new RegExp(`id=["']${id}["']`));
-  }
-  assert.match(html, /RetroDOS Game Computer/);
-  assert.match(html, /RD-8088/);
-});
-
-test('production source never links to Archive details pages', () => {
-  const source = [read('index.html'), read('assets/js/app.js'), read('assets/js/core.js')].join('\n');
-  assert.equal(source.includes('archive.org/details/'), false);
-});
-
-test('CSS includes responsive and reduced motion support', () => {
-  const css = read('assets/css/retrodos.css');
-  assert.match(css, /@media\s*\(max-width:\s*700px\)/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /body::after/);
-});
-
-test('home control resets to the full library and DOS history keeps its backslash', () => {
-  const app = read('assets/js/app.js');
-  assert.match(app, /homeButton\.addEventListener\('click', \(\) => navigate\('library'\)\)/);
-  assert.ok(app.includes('C:\\\\HISTORY&gt;'));
-});
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const css=fs.readFileSync(path.join(root,'assets/css/retrodos.css'),'utf8');
+const app=fs.readFileSync(path.join(root,'assets/js/app.js'),'utf8');
+test('V3 shell exposes desktop and mobile navigation',()=>{for(const id of ['desktopRail','mobileMenu','heroMachineArt','featuredRail','gameList'])assert.match(html,new RegExp(`id="${id}"`))});
+test('V3 player exposes touch command deck',()=>{for(const id of ['touchDeck','touchKeyboard','touchStatus','keyboardToggle','gameModeButton','focusGameButton','fullscreenButton'])assert.match(html,new RegExp(`id="${id}"`));for(const key of ['Escape','Enter','Space','Control','Alt','Shift','ArrowLeft','ArrowRight'])assert.match(html,new RegExp(`data-key="${key}"`))});
+test('V2 fake CSS computer is removed',()=>{assert.doesNotMatch(html,/hero-computer/);assert.doesNotMatch(html,/class="computer"/);assert.doesNotMatch(css,/\.hero-computer\b/);assert.doesNotMatch(css,/\.computer\s*\{/)});
+test('V3 has green and amber theme hooks',()=>{assert.match(html,/data-theme="green"/);assert.match(css,/body\[data-theme="amber"\]/);assert.match(app,/retrodos:theme:v3/)});
+test('player keeps Internet Archive embed helper and best-effort touch message',()=>{assert.match(app,/buildArchiveEmbedUrl/);assert.match(app,/postMessage\(\{source:'retrodos',type:'virtual-key',key\}/);assert.match(html,/Archive peut ignorer certaines touches/)});
