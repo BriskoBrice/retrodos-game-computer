@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07110b">
+  <meta name="description" content="RetroDOS Game Computer — explorez et lancez des classiques MS-DOS directement dans votre navigateur.">
+  <title>RetroDOS Game Computer — RD-8088</title>
+  <link rel="stylesheet" href="assets/css/retrodos.css">
+</head>
+<body class="is-booting">
+  <div class="boot-screen" id="bootScreen" aria-hidden="true">
+    <div class="boot-terminal">
+      <div class="boot-brand">RETRODOS GAME COMPUTER <span>RD-8088</span></div>
+      <p>MEMORY TEST........ <strong>640K OK</strong></p>
+      <p>GAME LIBRARY....... <strong>ONLINE</strong></p>
+      <p>ARCHIVE LINK....... <strong>ONLINE</strong></p>
+      <p class="boot-prompt">C:\&gt;<span class="cursor">_</span></p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button class="brand" id="homeButton" type="button" aria-label="Retour à la bibliothèque RetroDOS">
+        <span class="brand-mark">RD</span>
+        <span class="brand-copy">
+          <strong>RetroDOS</strong>
+          <small>GAME COMPUTER · RD-8088</small>
+        </span>
+      </button>
+      <div class="topbar-status" aria-hidden="true">
+        <span class="status-dot"></span> MS-DOS · NAVIGATEUR · ZÉRO INSTALLATION
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-button" id="helpButton" type="button" aria-label="Aide">?</button>
+        <button class="icon-button menu-glyph" id="menuButton" type="button" aria-label="Ouvrir le menu système" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="system-menu" id="systemMenu" aria-hidden="true" inert>
+    <div class="system-menu-panel">
+      <div class="system-menu-head">
+        <div>
+          <span class="eyebrow">SYSTEM MENU</span>
+          <h2>RD-8088</h2>
+        </div>
+        <button class="icon-button" id="menuCloseButton" type="button" aria-label="Fermer le menu">×</button>
+      </div>
+      <nav class="dos-nav" aria-label="Navigation RetroDOS">
+        <button type="button" data-nav="library"><span>C:\GAMES&gt;</span><strong>Bibliothèque</strong></button>
+        <button type="button" data-nav="collections"><span>C:\COLLECTIONS&gt;</span><strong>Collections</strong></button>
+        <button type="button" data-nav="favorites"><span>C:\FAVORITES&gt;</span><strong>Favoris</strong></button>
+        <button type="button" data-nav="history"><span>C:\HISTORY&gt;</span><strong>Derniers lancés</strong></button>
+        <button type="button" data-nav="random"><span>C:\RANDOM.EXE&gt;</span><strong>Surprends-moi</strong></button>
+      </nav>
+      <p class="menu-note">Interface rétro, navigation moderne. Aucun terminal à apprendre.</p>
+    </div>
+  </aside>
+
+  <main id="app">
+    <div id="libraryView">
+      <section class="hero shell-panel" aria-labelledby="heroTitle">
+        <div class="hero-computer" aria-hidden="true">
+          <div class="computer">
+            <div class="monitor-shell">
+              <div class="monitor-screen">
+                <div class="screen-glow"></div>
+                <span class="screen-prompt">C:\&gt;</span><span class="cursor">_</span>
+              </div>
+              <div class="monitor-badge">RETRODOS</div>
+            </div>
+            <div class="computer-base">
+              <span class="machine-label">RD-8088</span>
+              <div class="floppy-drive"><span></span><i></i></div>
+              <span class="power-led"></span>
+            </div>
+            <div class="keyboard">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span class="space"></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="status-dot"></span> MS-DOS · NAVIGATEUR · ZÉRO INSTALLATION</span>
+          <h1 id="heroTitle">La bibliothèque<br>des classiques DOS</h1>
+          <p>Revivez les chefs-d’œuvre du MS-DOS directement dans votre navigateur. Aucun téléchargement, aucune installation. Juste du rétro, prêt à jouer.</p>
+          <div class="hero-stats" aria-label="Statistiques du catalogue">
+            <div><strong id="gameCountStat">20</strong><span>JEUX</span></div>
+            <div><strong id="genreCountStat">—</strong><span>GENRES</span></div>
+            <div><strong>1990s</strong><span>FOCUS</span></div>
+            <div><strong>IA</strong><span>ARCHIVE</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="control-deck shell-panel" aria-label="Recherche et filtres">
+        <label class="search-box" for="searchInput">
+          <span>C:\&gt;</span>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Rechercher un jeu, un genre, une année…">
+          <kbd>/</kbd>
+        </label>
+        <div class="filter-row">
+          <div class="filter-chips" id="genreFilters" aria-label="Genres"></div>
+          <label class="year-control">
+            <span class="sr-only">Filtrer par année</span>
+            <select id="yearFilter"><option value="all">Toutes les années</option></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="content-section" id="recentSection" aria-labelledby="recentTitle">
+        <div class="section-heading">
+          <div>
+            <span class="section-prompt">C:\HISTORY&gt;</span>
+            <h2 id="recentTitle">Derniers lancés</h2>
+          </div>
+          <span class="section-count" id="recentCount">0 jeu</span>
+        </div>
+        <div class="mini-rail" id="recentRail"></div>
+      </section>
+
+      <section class="content-section" id="collectionsSection" aria-labelledby="collectionsTitle">
+        <div class="section-heading">
+          <div>
+            <span class="section-prompt">C:\COLLECTIONS&gt;</span>
+            <h2 id="collectionsTitle">Collections spéciales</h2>
+          </div>
+          <button class="text-button" type="button" data-nav="random">RANDOM.EXE ↗</button>
+        </div>
+        <div class="collection-grid" id="collectionGrid"></div>
+      </section>
+
+      <section class="content-section library-section" id="librarySection" aria-labelledby="libraryTitle">
+        <div class="section-heading library-heading">
+          <div>
+            <span class="section-prompt">C:\GAMES&gt;</span>
+            <h2 id="libraryTitle">Bibliothèque</h2>
+          </div>
+          <span class="section-count phosphor" id="resultCount">20 résultats</span>
+        </div>
+        <div class="game-list" id="gameList"></div>
+      </section>
+    </div>
+
+    <section id="playerView" class="player-view" hidden aria-labelledby="playerTitle">
+      <div class="player-head shell-panel">
+        <div class="player-title-group">
+          <span class="section-prompt">C:\GAMES\RUN&gt;</span>
+          <h1 id="playerTitle">Jeu</h1>
+          <p id="playerMeta">—</p>
+        </div>
+        <div class="player-actions">
+          <button class="icon-button" id="backButton" type="button" aria-label="Retour à la bibliothèque">←</button>
+          <button class="icon-button" id="playerFavoriteButton" type="button" aria-label="Ajouter aux favoris">☆</button>
+          <button class="icon-button accent" id="fullscreenButton" type="button" aria-label="Plein écran">⛶</button>
+        </div>
+      </div>
+
+      <div class="player-monitor shell-panel" id="playerMonitor">
+        <div class="player-screen">
+          <div class="player-poster" id="playerPoster">
+            <img id="playerPosterImage" alt="">
+            <div class="poster-shade"></div>
+            <div class="poster-terminal">
+              <span>READY TO LOAD</span>
+              <strong id="posterTitle">GAME.EXE</strong>
+              <button class="primary-button" id="posterPlayButton" type="button">▶ Lancer le jeu</button>
+            </div>
+          </div>
+          <div class="player-loader" id="playerLoader" hidden>
+            <div class="loader-logo">RD</div>
+            <strong>Launching emulator</strong>
+            <span>Connexion au lecteur Internet Archive…</span>
+          </div>
+          <iframe id="gameFrame" title="Lecteur de jeu MS-DOS" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
+        </div>
+        <div class="monitor-status">
+          <span><i class="status-dot"></i> RETRODOS // CRT-486</span>
+          <code id="monitorArchiveId">archive-id</code>
+        </div>
+      </div>
+
+      <div class="player-info-grid">
+        <article class="info-card shell-panel">
+          <span class="section-prompt">C:\INFO&gt;</span>
+          <h2 id="aboutTitle">À propos</h2>
+          <p id="playerDescription"></p>
+          <dl class="metadata-grid">
+            <div><dt>Développeur</dt><dd id="playerDeveloper">—</dd></div>
+            <div><dt>Éditeur</dt><dd id="playerPublisher">—</dd></div>
+          </dl>
+        </article>
+        <article class="info-card controls-card shell-panel">
+          <span class="section-prompt">C:\CONTROL&gt;</span>
+          <h2>Commandes RetroDOS</h2>
+          <div class="key-row"><kbd>Échap</kbd><span>retour bibliothèque</span></div>
+          <div class="key-row"><kbd>F</kbd><span>plein écran</span></div>
+          <div class="key-row"><kbd>/</kbd><span>recherche bibliothèque</span></div>
+          <p class="muted">Le clavier du jeu dépend de l’émulation Archive.</p>
+        </article>
+      </div>
+
+      <section class="content-section related-section" aria-labelledby="relatedTitle">
+        <div class="section-heading">
+          <div>
+            <span class="section-prompt">C:\DISCOVER&gt;</span>
+            <h2 id="relatedTitle">Vous aimerez aussi</h2>
+          </div>
+        </div>
+        <div class="mini-rail" id="relatedRail"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>•••••</span> RETRODOS · MS-DOS DANS VOTRE NAVIGATEUR <span>•••••</span>
+  </footer>
+
+  <dialog class="help-dialog" id="helpDialog">
+    <form method="dialog">
+      <button class="icon-button dialog-close" aria-label="Fermer">×</button>
+      <span class="section-prompt">C:\HELP&gt;</span>
+      <h2>Bienvenue sur le RD-8088</h2>
+      <p>RetroDOS emprunte le langage visuel de DOS, mais toute l’interface reste tactile, cliquable et moderne.</p>
+      <ul>
+        <li><kbd>/</kbd> place le curseur dans la recherche.</li>
+        <li><kbd>F</kbd> active le plein écran depuis une fiche jeu.</li>
+        <li><kbd>Échap</kbd> revient à la bibliothèque.</li>
+      </ul>
+      <button class="primary-button" value="close">Compris</button>
+    </form>
+  </dialog>
+
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
