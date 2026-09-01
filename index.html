@@ -3,238 +3,108 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#07110b">
-  <meta name="description" content="RetroDOS Game Computer — explorez et lancez des classiques MS-DOS directement dans votre navigateur.">
+  <meta name="theme-color" content="#070907">
+  <meta name="description" content="RetroDOS Game Computer — bibliothèque MS-DOS jouable dans le navigateur.">
   <title>RetroDOS Game Computer — RD-8088</title>
   <link rel="stylesheet" href="assets/css/retrodos.css">
 </head>
-<body class="is-booting">
+<body data-theme="green" class="is-booting">
   <div class="boot-screen" id="bootScreen" aria-hidden="true">
     <div class="boot-terminal">
-      <div class="boot-brand">RETRODOS GAME COMPUTER <span>RD-8088</span></div>
-      <p>MEMORY TEST........ <strong>640K OK</strong></p>
-      <p>GAME LIBRARY....... <strong>ONLINE</strong></p>
-      <p>ARCHIVE LINK....... <strong>ONLINE</strong></p>
-      <p class="boot-prompt">C:\&gt;<span class="cursor">_</span></p>
+      <div class="boot-wordmark">RetroDOS<span>_</span></div>
+      <p>RD-8088 SYSTEM CHECK <strong>OK</strong></p>
+      <p>MEMORY.............. <strong>640K</strong></p>
+      <p>GAME LIBRARY........ <strong>ONLINE</strong></p>
+      <p>ARCHIVE LINK......... <strong>READY</strong></p>
+      <p class="boot-prompt">C:\RETRODOS&gt;<span class="cursor">_</span></p>
     </div>
   </div>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <button class="brand" id="homeButton" type="button" aria-label="Retour à la bibliothèque RetroDOS">
-        <span class="brand-mark">RD</span>
-        <span class="brand-copy">
-          <strong>RetroDOS</strong>
-          <small>GAME COMPUTER · RD-8088</small>
-        </span>
-      </button>
-      <div class="topbar-status" aria-hidden="true">
-        <span class="status-dot"></span> MS-DOS · NAVIGATEUR · ZÉRO INSTALLATION
-      </div>
-      <div class="topbar-actions">
-        <button class="icon-button" id="helpButton" type="button" aria-label="Aide">?</button>
-        <button class="icon-button menu-glyph" id="menuButton" type="button" aria-label="Ouvrir le menu système" aria-expanded="false">☰</button>
-      </div>
+  <aside class="desktop-rail" id="desktopRail" aria-label="Navigation principale">
+    <button class="rail-brand" id="homeButton" type="button" aria-label="Accueil RetroDOS">
+      <span class="rail-icon">RD</span>
+      <span><strong>RetroDOS</strong><small>GAME COMPUTER</small></span>
+    </button>
+    <nav class="rail-nav">
+      <button type="button" data-nav="home" class="is-active"><span>⌂</span>Accueil</button>
+      <button type="button" data-nav="library"><span>▦</span>Bibliothèque</button>
+      <button type="button" data-nav="collections"><span>▣</span>Collections</button>
+      <button type="button" data-nav="favorites"><span>☆</span>Favoris</button>
+      <button type="button" data-nav="history"><span>↻</span>Derniers lancés</button>
+    </nav>
+    <div class="rail-status">
+      <div><span>SYSTEM</span><strong>RD-8088</strong></div>
+      <div><span>MEMORY</span><strong>640K</strong></div>
+      <div><span>ARCHIVE</span><strong class="online">ONLINE</strong></div>
+      <code>C:\RETRODOS&gt; _</code>
+    </div>
+    <button class="theme-switch" id="themeButton" type="button" aria-label="Changer de thème">◐ <span>PHOSPHOR</span></button>
+  </aside>
+
+  <header class="mobile-topbar">
+    <button class="mobile-brand" id="mobileHomeButton" type="button" aria-label="Accueil RetroDOS"><span>RD</span><strong>RetroDOS</strong></button>
+    <div class="mobile-actions">
+      <button class="icon-button" id="mobileThemeButton" type="button" aria-label="Changer de thème">◐</button>
+      <button class="icon-button" id="menuButton" type="button" aria-label="Ouvrir le menu">☰</button>
     </div>
   </header>
 
-  <aside class="system-menu" id="systemMenu" aria-hidden="true" inert>
-    <div class="system-menu-panel">
-      <div class="system-menu-head">
-        <div>
-          <span class="eyebrow">SYSTEM MENU</span>
-          <h2>RD-8088</h2>
-        </div>
-        <button class="icon-button" id="menuCloseButton" type="button" aria-label="Fermer le menu">×</button>
-      </div>
-      <nav class="dos-nav" aria-label="Navigation RetroDOS">
-        <button type="button" data-nav="library"><span>C:\GAMES&gt;</span><strong>Bibliothèque</strong></button>
-        <button type="button" data-nav="collections"><span>C:\COLLECTIONS&gt;</span><strong>Collections</strong></button>
-        <button type="button" data-nav="favorites"><span>C:\FAVORITES&gt;</span><strong>Favoris</strong></button>
-        <button type="button" data-nav="history"><span>C:\HISTORY&gt;</span><strong>Derniers lancés</strong></button>
-        <button type="button" data-nav="random"><span>C:\RANDOM.EXE&gt;</span><strong>Surprends-moi</strong></button>
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true" inert>
+    <div class="mobile-menu-panel">
+      <div class="mobile-menu-head"><span>RD-8088 // SYSTEM MENU</span><button class="icon-button" id="menuCloseButton" type="button" aria-label="Fermer">×</button></div>
+      <nav>
+        <button type="button" data-nav="home">C:\HOME&gt;<strong>Accueil</strong></button>
+        <button type="button" data-nav="library">C:\GAMES&gt;<strong>Bibliothèque</strong></button>
+        <button type="button" data-nav="collections">C:\COLLECTIONS&gt;<strong>Collections</strong></button>
+        <button type="button" data-nav="favorites">C:\FAVORITES&gt;<strong>Favoris</strong></button>
+        <button type="button" data-nav="history">C:\HISTORY&gt;<strong>Derniers lancés</strong></button>
+        <button type="button" data-nav="random">C:\RANDOM.EXE&gt;<strong>Surprends-moi</strong></button>
       </nav>
-      <p class="menu-note">Interface rétro, navigation moderne. Aucun terminal à apprendre.</p>
     </div>
-  </aside>
+  </div>
 
-  <main id="app">
+  <main class="app-shell" id="app">
     <div id="libraryView">
-      <section class="hero shell-panel" aria-labelledby="heroTitle">
-        <div class="hero-computer" aria-hidden="true">
-          <div class="computer">
-            <div class="monitor-shell">
-              <div class="monitor-screen">
-                <div class="screen-glow"></div>
-                <span class="screen-prompt">C:\&gt;</span><span class="cursor">_</span>
-              </div>
-              <div class="monitor-badge">RETRODOS</div>
-            </div>
-            <div class="computer-base">
-              <span class="machine-label">RD-8088</span>
-              <div class="floppy-drive"><span></span><i></i></div>
-              <span class="power-led"></span>
-            </div>
-            <div class="keyboard">
-              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span><span class="space"></span><span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-        </div>
+      <section class="hero-v3" id="homeSection" aria-labelledby="heroTitle">
         <div class="hero-copy">
-          <span class="eyebrow"><span class="status-dot"></span> MS-DOS · NAVIGATEUR · ZÉRO INSTALLATION</span>
-          <h1 id="heroTitle">La bibliothèque<br>des classiques DOS</h1>
-          <p>Revivez les chefs-d’œuvre du MS-DOS directement dans votre navigateur. Aucun téléchargement, aucune installation. Juste du rétro, prêt à jouer.</p>
-          <div class="hero-stats" aria-label="Statistiques du catalogue">
-            <div><strong id="gameCountStat">20</strong><span>JEUX</span></div>
-            <div><strong id="genreCountStat">—</strong><span>GENRES</span></div>
-            <div><strong>1990s</strong><span>FOCUS</span></div>
-            <div><strong>IA</strong><span>ARCHIVE</span></div>
+          <div class="system-kicker"><i></i> RD-8088 · MS-DOS · BROWSER READY</div>
+          <h1 id="heroTitle"><span>MS-DOS.</span><br>Préservé.<br><em>Jouable.</em></h1>
+          <p>Une bibliothèque de classiques DOS pensée comme une machine perdue des années 90 — remise en ligne pour le web moderne.</p>
+          <div class="hero-actions">
+            <button class="primary-button" type="button" data-nav="library">Explorer la bibliothèque <span>→</span></button>
+            <button class="secondary-button" type="button" data-nav="random">RANDOM.EXE</button>
           </div>
+          <div class="hero-meta"><span><b id="gameCountStat">20</b> jeux</span><span><b id="genreCountStat">—</b> genres</span><span><b>0</b> installation</span></div>
         </div>
+        <figure class="hero-machine" id="heroMachineArt">
+          <img src="data:image/webp;base64,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" alt="Concept visuel du RetroDOS Game Computer RD-8088">
+          <figcaption><span>RD-8088</span><small>CONCEPT MACHINE · FRONT-FACING CRT</small></figcaption>
+        </figure>
       </section>
 
-      <section class="control-deck shell-panel" aria-label="Recherche et filtres">
-        <label class="search-box" for="searchInput">
-          <span>C:\&gt;</span>
-          <input id="searchInput" type="search" autocomplete="off" placeholder="Rechercher un jeu, un genre, une année…">
-          <kbd>/</kbd>
-        </label>
-        <div class="filter-row">
-          <div class="filter-chips" id="genreFilters" aria-label="Genres"></div>
-          <label class="year-control">
-            <span class="sr-only">Filtrer par année</span>
-            <select id="yearFilter"><option value="all">Toutes les années</option></select>
-          </label>
-        </div>
+      <section class="command-bar" id="commandBar" aria-label="Recherche et filtres">
+        <label class="search-field" for="searchInput"><span>C:\GAMES&gt;</span><input id="searchInput" type="search" autocomplete="off" placeholder="Rechercher un jeu, un genre, une année…"><kbd>/</kbd></label>
+        <div class="filter-tools"><div class="genre-chips" id="genreFilters" aria-label="Genres"></div><select id="yearFilter" aria-label="Filtrer par année"><option value="all">Toutes les années</option></select></div>
       </section>
 
-      <section class="content-section" id="recentSection" aria-labelledby="recentTitle">
-        <div class="section-heading">
-          <div>
-            <span class="section-prompt">C:\HISTORY&gt;</span>
-            <h2 id="recentTitle">Derniers lancés</h2>
-          </div>
-          <span class="section-count" id="recentCount">0 jeu</span>
-        </div>
-        <div class="mini-rail" id="recentRail"></div>
-      </section>
-
-      <section class="content-section" id="collectionsSection" aria-labelledby="collectionsTitle">
-        <div class="section-heading">
-          <div>
-            <span class="section-prompt">C:\COLLECTIONS&gt;</span>
-            <h2 id="collectionsTitle">Collections spéciales</h2>
-          </div>
-          <button class="text-button" type="button" data-nav="random">RANDOM.EXE ↗</button>
-        </div>
-        <div class="collection-grid" id="collectionGrid"></div>
-      </section>
-
-      <section class="content-section library-section" id="librarySection" aria-labelledby="libraryTitle">
-        <div class="section-heading library-heading">
-          <div>
-            <span class="section-prompt">C:\GAMES&gt;</span>
-            <h2 id="libraryTitle">Bibliothèque</h2>
-          </div>
-          <span class="section-count phosphor" id="resultCount">20 résultats</span>
-        </div>
-        <div class="game-list" id="gameList"></div>
-      </section>
+      <section class="section-block" id="featuredSection" aria-labelledby="featuredTitle"><header class="section-head"><div><span>C:\FEATURED&gt;</span><h2 id="featuredTitle">À lancer absolument</h2></div><button class="link-button" type="button" data-nav="random">Surprends-moi ↗</button></header><div class="poster-rail" id="featuredRail"></div></section>
+      <section class="section-block" id="recentSection" aria-labelledby="recentTitle"><header class="section-head"><div><span>C:\HISTORY&gt;</span><h2 id="recentTitle">Derniers lancés</h2></div><small id="recentCount">0 jeu</small></header><div class="poster-rail compact" id="recentRail"></div></section>
+      <section class="section-block" id="collectionsSection" aria-labelledby="collectionsTitle"><header class="section-head"><div><span>C:\COLLECTIONS&gt;</span><h2 id="collectionsTitle">Collections spéciales</h2></div></header><div class="collection-grid" id="collectionGrid"></div></section>
+      <section class="section-block library-section" id="librarySection" aria-labelledby="libraryTitle"><header class="section-head"><div><span>C:\GAMES&gt;</span><h2 id="libraryTitle">Bibliothèque</h2></div><small id="resultCount">20 résultats</small></header><div class="game-grid" id="gameList"></div></section>
     </div>
 
-    <section id="playerView" class="player-view" hidden aria-labelledby="playerTitle">
-      <div class="player-head shell-panel">
-        <div class="player-title-group">
-          <span class="section-prompt">C:\GAMES\RUN&gt;</span>
-          <h1 id="playerTitle">Jeu</h1>
-          <p id="playerMeta">—</p>
-        </div>
-        <div class="player-actions">
-          <button class="icon-button" id="backButton" type="button" aria-label="Retour à la bibliothèque">←</button>
-          <button class="icon-button" id="playerFavoriteButton" type="button" aria-label="Ajouter aux favoris">☆</button>
-          <button class="icon-button accent" id="fullscreenButton" type="button" aria-label="Plein écran">⛶</button>
-        </div>
+    <section class="player-view" id="playerView" hidden aria-labelledby="playerTitle">
+      <header class="player-topline"><button class="back-button" id="backButton" type="button">← Bibliothèque</button><div class="player-heading"><span>C:\GAMES\RUN&gt;</span><h1 id="playerTitle">Jeu</h1><p id="playerMeta">—</p></div><button class="favorite-round" id="playerFavoriteButton" type="button" aria-label="Ajouter aux favoris">☆</button></header>
+      <div class="orientation-tip" id="orientationTip">↻ Pour jouer confortablement sur mobile, le paysage est conseillé.</div>
+      <div class="player-layout">
+        <section class="player-shell" id="playerShell" aria-label="Lecteur de jeu"><div class="crt-frame"><div class="game-viewport"><div class="player-poster" id="playerPoster"><img id="playerPosterImage" alt=""><div class="player-poster-overlay"><span>RD-8088 // READY</span><strong id="posterTitle">GAME.EXE</strong><button class="primary-button" id="posterPlayButton" type="button">▶ Lancer le jeu</button></div></div><div class="player-loader" id="playerLoader" hidden><span class="loader-dot"></span><strong>Connexion au lecteur Archive…</strong></div><iframe id="gameFrame" title="Lecteur de jeu MS-DOS" allow="fullscreen; autoplay" allowfullscreen></iframe></div><footer class="crt-status"><span><i></i> RETRODOS // CRT-486</span><code id="monitorArchiveId">archive-id</code></footer></div></section>
+        <aside class="game-info-panel"><div class="info-block"><span>C:\INFO&gt;</span><h2 id="aboutTitle">À propos</h2><p id="playerDescription"></p></div><dl class="meta-table"><div><dt>Développeur</dt><dd id="playerDeveloper">—</dd></div><div><dt>Éditeur</dt><dd id="playerPublisher">—</dd></div></dl><div class="compat-note"><b>ARCHIVE MODE</b><p>Le jeu reste chargé depuis Internet Archive. Les commandes tactiles RetroDOS sont une couche de compatibilité bêta.</p></div></aside>
       </div>
-
-      <div class="player-monitor shell-panel" id="playerMonitor">
-        <div class="player-screen">
-          <div class="player-poster" id="playerPoster">
-            <img id="playerPosterImage" alt="">
-            <div class="poster-shade"></div>
-            <div class="poster-terminal">
-              <span>READY TO LOAD</span>
-              <strong id="posterTitle">GAME.EXE</strong>
-              <button class="primary-button" id="posterPlayButton" type="button">▶ Lancer le jeu</button>
-            </div>
-          </div>
-          <div class="player-loader" id="playerLoader" hidden>
-            <div class="loader-logo">RD</div>
-            <strong>Launching emulator</strong>
-            <span>Connexion au lecteur Internet Archive…</span>
-          </div>
-          <iframe id="gameFrame" title="Lecteur de jeu MS-DOS" allow="fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
-        </div>
-        <div class="monitor-status">
-          <span><i class="status-dot"></i> RETRODOS // CRT-486</span>
-          <code id="monitorArchiveId">archive-id</code>
-        </div>
-      </div>
-
-      <div class="player-info-grid">
-        <article class="info-card shell-panel">
-          <span class="section-prompt">C:\INFO&gt;</span>
-          <h2 id="aboutTitle">À propos</h2>
-          <p id="playerDescription"></p>
-          <dl class="metadata-grid">
-            <div><dt>Développeur</dt><dd id="playerDeveloper">—</dd></div>
-            <div><dt>Éditeur</dt><dd id="playerPublisher">—</dd></div>
-          </dl>
-        </article>
-        <article class="info-card controls-card shell-panel">
-          <span class="section-prompt">C:\CONTROL&gt;</span>
-          <h2>Commandes RetroDOS</h2>
-          <div class="key-row"><kbd>Échap</kbd><span>retour bibliothèque</span></div>
-          <div class="key-row"><kbd>F</kbd><span>plein écran</span></div>
-          <div class="key-row"><kbd>/</kbd><span>recherche bibliothèque</span></div>
-          <p class="muted">Le clavier du jeu dépend de l’émulation Archive.</p>
-        </article>
-      </div>
-
-      <section class="content-section related-section" aria-labelledby="relatedTitle">
-        <div class="section-heading">
-          <div>
-            <span class="section-prompt">C:\DISCOVER&gt;</span>
-            <h2 id="relatedTitle">Vous aimerez aussi</h2>
-          </div>
-        </div>
-        <div class="mini-rail" id="relatedRail"></div>
-      </section>
+      <section class="touch-deck" id="touchDeck" aria-label="Commandes de jeu"><div class="touch-deck-main"><button id="focusGameButton" type="button"><span>◎</span><strong>Focus jeu</strong><small>donner le clavier au lecteur</small></button><button id="gameModeButton" type="button"><span>▣</span><strong>Mode jeu</strong><small>plein écran + paysage</small></button><button id="fullscreenButton" type="button"><span>⛶</span><strong>Plein écran</strong><small>écran RetroDOS</small></button><button id="keyboardToggle" type="button" aria-expanded="false"><span>⌨</span><strong>Clavier</strong><small>touches rapides</small></button></div><div class="touch-keyboard" id="touchKeyboard" hidden><div class="keyboard-head"><div><span>C:\CONTROL&gt;</span><strong>Clavier tactile · bêta</strong></div><small>Archive peut ignorer certaines touches.</small></div><div class="keyboard-grid"><button type="button" data-key="Escape">Esc</button><button type="button" data-key="Control">Ctrl</button><button type="button" data-key="Alt">Alt</button><button type="button" data-key="Shift">Shift</button><button type="button" data-key="Enter">Enter</button><button type="button" data-key="ArrowLeft">←</button><button type="button" data-key="ArrowUp">↑</button><button type="button" data-key="ArrowDown">↓</button><button type="button" data-key="ArrowRight">→</button><button type="button" class="space-key" data-key="Space">Space</button></div><p class="touch-status" id="touchStatus">Appuie d’abord sur « Focus jeu ». Le clavier intégré reste expérimental avec les iframes Archive.</p></div></section>
+      <section class="section-block related-section" aria-labelledby="relatedTitle"><header class="section-head"><div><span>C:\DISCOVER&gt;</span><h2 id="relatedTitle">Vous aimerez aussi</h2></div></header><div class="poster-rail compact" id="relatedRail"></div></section>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <span>•••••</span> RETRODOS · MS-DOS DANS VOTRE NAVIGATEUR <span>•••••</span>
-  </footer>
-
-  <dialog class="help-dialog" id="helpDialog">
-    <form method="dialog">
-      <button class="icon-button dialog-close" aria-label="Fermer">×</button>
-      <span class="section-prompt">C:\HELP&gt;</span>
-      <h2>Bienvenue sur le RD-8088</h2>
-      <p>RetroDOS emprunte le langage visuel de DOS, mais toute l’interface reste tactile, cliquable et moderne.</p>
-      <ul>
-        <li><kbd>/</kbd> place le curseur dans la recherche.</li>
-        <li><kbd>F</kbd> active le plein écran depuis une fiche jeu.</li>
-        <li><kbd>Échap</kbd> revient à la bibliothèque.</li>
-      </ul>
-      <button class="primary-button" value="close">Compris</button>
-    </form>
-  </dialog>
-
-  <script src="assets/js/core.js"></script>
-  <script src="assets/js/catalog.js"></script>
-  <script src="assets/js/app.js"></script>
+  <footer class="site-footer">C:\RETRODOS&gt; PLAY CLASSICS. PRESERVE MEMORIES. <span>● ONLINE</span></footer>
+  <script src="assets/js/core.js"></script><script src="assets/js/catalog.js"></script><script src="assets/js/app.js"></script>
 </body>
 </html>
