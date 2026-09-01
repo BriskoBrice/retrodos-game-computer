@@ -1,0 +1,39 @@
+(function (root, factory) {
+  const data = factory();
+  if (typeof module === 'object' && module.exports) module.exports = data;
+  if (root) {
+    root.RETRODOS_GAMES = data.games;
+    root.RETRODOS_COLLECTIONS = data.collections;
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const games = [
+    { id:'doom', title:'DOOM', year:1993, genre:'FPS', developer:'id Software', publisher:'id Software', description:"Le monument d'id Software : couloirs infernaux, shotgun, démons et une révolution technique devenue symbole du PC des années 90.", archiveId:'msdos_DOOM_1993', image:null, collections:['Légendes DOS','FPS 90s'], featured:true },
+    { id:'prince-of-persia', title:'Prince of Persia', year:1990, genre:'Plateforme', developer:'Jordan Mechner', publisher:'Broderbund', description:'Animation rotoscopée, pièges millimétrés et palais labyrinthique : un classique élégant et impitoyable.', archiveId:'msdos_Prince_of_Persia_1990', image:null, collections:['Légendes DOS'], featured:true },
+    { id:'wolfenstein-3d', title:'Wolfenstein 3D', year:1992, genre:'FPS', developer:'id Software', publisher:'Apogee Software', description:"L'un des pères du FPS moderne : couloirs secrets, gardes, trésors et vitesse folle.", archiveId:'msdos_Wolfenstein_3D_1992', image:null, collections:['Légendes DOS','FPS 90s'], featured:true },
+    { id:'simcity', title:'SimCity', year:1989, genre:'Gestion', developer:'Maxis', publisher:'Maxis', description:'Construisez votre ville, équilibrez budget et services, puis regardez vos choix produire réussites ou catastrophes.', archiveId:'msdos_SimCity_1989', image:null, collections:['Stratégie & Gestion'], featured:false },
+    { id:'commander-keen', title:'Commander Keen', year:1990, genre:'Plateforme', developer:'id Software', publisher:'Apogee Software', description:'Billy Blaze part sauver la galaxie dans un platformer PC fluide qui a marqué le shareware.', archiveId:'msdos_Commander_Keen_1_-_Marooned_on_Mars_1990', image:null, collections:['Légendes DOS','Shareware Classics'], featured:true },
+    { id:'dune-2', title:'Dune II', year:1992, genre:'Stratégie', developer:'Westwood Studios', publisher:'Virgin Games', description:"Récolter l'épice, construire une base, produire des unités : un jalon essentiel du RTS moderne.", archiveId:'msdos_Dune_2_-_The_Building_of_a_Dynasty_1992', image:null, collections:['Stratégie & Gestion','Légendes DOS'], featured:true },
+    { id:'alone-in-the-dark', title:'Alone in the Dark', year:1992, genre:'Aventure', developer:'Infogrames', publisher:'Infogrames', description:'Derceto, ses angles de caméra fixes et ses créatures : une pierre fondatrice du survival horror en 3D.', archiveId:'msdos_Alone_in_the_Dark_1992', image:null, collections:['Légendes DOS','Aventure'], featured:false },
+    { id:'scorched-earth', title:'Scorched Earth', year:1991, genre:'Artillerie', developer:'Wendell Hicken', publisher:'Shareware', description:'Des tanks, des trajectoires balistiques et beaucoup de mauvaise foi entre amis : la mother of all games.', archiveId:'msdos_Scorched_Earth_1991', image:null, collections:['Shareware Classics','Arcade PC'], featured:false },
+    { id:'jazz-jackrabbit', title:'Jazz Jackrabbit', year:1994, genre:'Plateforme', developer:'Epic MegaGames', publisher:'Epic MegaGames', description:'La réponse survitaminée du PC aux mascottes consoles : vitesse, couleurs et bande-son très années 90.', archiveId:'msdos_Jazz_Jackrabbit_1994', image:null, collections:['Shareware Classics','Arcade PC'], featured:true },
+    { id:'zork', title:'Zork I', year:1980, genre:'Aventure texte', developer:'Infocom', publisher:'Infocom', description:'Pas de sprites ni de souris : seulement du texte, votre imagination et un immense monde souterrain.', archiveId:'msdos_Zork_I_-_The_Great_Underground_Empire_1980', image:null, collections:['Origines','Aventure'], featured:false },
+    { id:'carmen-sandiego', title:'Where in the World is Carmen Sandiego?', year:1985, genre:'Éducatif', developer:'Broderbund', publisher:'Broderbund', description:'Une enquête autour du monde devenue culte : indices, géographie, suspects et chasse à Carmen.', archiveId:'msdos_Where_in_the_World_is_Carmen_Sandiego_1985', image:null, collections:['Origines'], featured:false },
+    { id:'pac-man', title:'Pac-Man', year:1983, genre:'Arcade', developer:'Atarisoft', publisher:'Atarisoft', description:'Le labyrinthe le plus célèbre du jeu vidéo dans une version PC historique : gommes, fantômes et score.', archiveId:'msdos_Pac-Man_1983', image:null, collections:['Origines','Arcade PC'], featured:false },
+    { id:'alley-cat', title:'Alley Cat', year:1984, genre:'Arcade', developer:'Bill Williams', publisher:'IBM', description:'Un chat de gouttière, des fenêtres ouvertes et des mini-épreuves étranges : du PC CGA pur jus.', archiveId:'msdos_Alley_Cat_1984', image:null, collections:['Origines','Arcade PC'], featured:false },
+    { id:'monkey-island', title:'The Secret of Monkey Island', year:1990, genre:'Point & Click', developer:'Lucasfilm Games', publisher:'Lucasfilm Games', description:'Guybrush Threepwood veut devenir pirate. Humour culte, dialogues brillants et énigmes inventives.', archiveId:'msdos_Secret_of_Monkey_Island_The_1990', image:null, collections:['Point & Click','Légendes DOS','Aventure'], featured:true },
+    { id:'theme-hospital', title:'Theme Hospital', year:1997, genre:'Gestion', developer:'Bullfrog Productions', publisher:'Electronic Arts', description:'Construisez un hôpital délicieusement absurde, recrutez le personnel et gérez des maladies impossibles.', archiveId:'msdos_Theme_Hospital_1997', image:null, collections:['Stratégie & Gestion','Légendes DOS'], featured:true },
+    { id:'quake', title:'Quake', year:1996, genre:'FPS', developer:'id Software', publisher:'GT Interactive', description:'Le passage à la vraie 3D : ambiance gothique, vitesse folle et moteur qui a changé durablement le jeu PC.', archiveId:'msdos_Quake_1996', image:null, collections:['Légendes DOS','FPS 90s'], featured:true },
+    { id:'duke3d', title:'Duke Nukem 3D', year:1996, genre:'FPS', developer:'3D Realms', publisher:'GT Interactive', description:'Action, niveaux interactifs et humour très 90s : un grand représentant de la génération Build Engine.', archiveId:'msdos_Duke_Nukem_3D_1996', image:null, collections:['Légendes DOS','FPS 90s'], featured:true },
+    { id:'arkanoid', title:'Arkanoid', year:1988, genre:'Arcade', developer:'Taito', publisher:'Imagine Software', description:'La formule Breakout propulsée dans les années 80 : Vaus, briques, bonus et trajectoires obsessionnelles.', archiveId:'msdos_Arkanoid_1988', image:null, collections:['Arcade PC','Origines'], featured:false },
+    { id:'battle-chess', title:'Battle Chess', year:1988, genre:'Stratégie', developer:'Interplay', publisher:'Interplay', description:'Les échecs deviennent un spectacle : chaque prise déclenche une petite scène de combat animée.', archiveId:'msdos_Battle_Chess_1988', image:null, collections:['Origines','Stratégie & Gestion'], featured:false },
+    { id:'golden-axe', title:'Golden Axe', year:1990, genre:"Beat 'em up", developer:'Sega', publisher:'Sega', description:"Barbare, amazone ou nain : traversez un monde heroic-fantasy à coups d'épée et de magie.", archiveId:'msdos_Golden_Axe_1990', image:null, collections:['Arcade PC','Légendes DOS'], featured:false }
+  ];
+
+  const collections = [
+    { id:'dos-legends', title:'Légendes DOS', subtitle:'Les chefs-d’œuvre qui ont marqué une époque.', accent:'amber', prompt:'C:\\COLLECTIONS\\LEGENDS>' },
+    { id:'fps-90s', title:'FPS 90s', subtitle:'Adrénaline, pixels et couloirs impossibles.', accent:'green', prompt:'C:\\COLLECTIONS\\FPS90S>' },
+    { id:'point-click', title:'Point & Click', subtitle:'Énigmes, dialogues et aventures cultes.', accent:'blue', prompt:'C:\\COLLECTIONS\\POINTCLICK>' }
+  ];
+
+  return { games, collections };
+});
