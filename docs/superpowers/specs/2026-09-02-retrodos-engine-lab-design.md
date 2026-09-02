@@ -103,8 +103,8 @@ Example shape:
   id: "doom-shareware",
   title: "DOOM",
   engine: "dosbox-pure",
-  packageUrl: "...",
-  autoStartPath: "...",
+  packageSource: "approved-shareware-source",
+  autoStartPath: "DOOM.EXE",
   controllerMode: "gamepad",
   touchProfile: "fps",
   language: "en",
@@ -112,13 +112,15 @@ Example shape:
 }
 ```
 
-This is the seed of the future catalog/runtime resolver but is not connected to the production catalog during this lab.
+`packageSource` is resolved by the lab adapter to one verified redistributable/shareware package URL. The source URL itself is configuration, not UI code.
+
+This descriptor is the seed of the future catalog/runtime resolver but is not connected to the production catalog during this lab.
 
 ## Content source rule
 
 The repository must not commit commercial game data.
 
-For the first lab, use a redistributable/shareware DOOM package or another source whose redistribution terms are suitable for testing. Internet Archive may remain a source of metadata or externally hosted files later, but the lab must not depend on an Archive iframe.
+For the first lab, use a redistributable/shareware DOOM package from a source whose redistribution terms are verified before wiring it into the runtime. Internet Archive may remain a source of metadata or externally hosted files later, but the lab must not depend on an Archive iframe.
 
 ## Error handling
 
