@@ -25,16 +25,18 @@ The lab does not need favorites, collections, search, game details, themes, manu
 
 ## Recommended technical approach
 
-Use the open-source webЯcade DOS application as the reference implementation for running a modified DOSBox Pure core in the browser, but keep the RetroDOS lab isolated from the existing V3 UI.
+Use **EmulatorJS with its `dosbox_pure` core** as the browser runtime for the first lab.
 
-Why this route:
+This replaces the earlier plan to build directly on the webЯcade DOS application layer. webЯcade remains a useful reference, but EmulatorJS is the better fit for this experiment because it already exposes the DOSBox Pure core and a documented customizable virtual gamepad. That lets RetroDOS validate the Android control experience without first rebuilding a large emulator wrapper.
 
-- webЯcade already runs DOSBox Pure in the browser
-- its emulator wrapper exposes keyboard, mouse and controller paths instead of relying on a cross-origin iframe
-- it already understands archive-based DOS content and autostart paths
-- DOSBox Pure provides the long-term path toward automatic gamepad mappings rather than per-game HTML key injection
+Runtime rules:
 
-The first lab may reuse or adapt Apache-2.0 webЯcade application-layer code where appropriate. DOSBox Pure itself remains under GPL-2.0-or-later, so bundled core/runtime files and attribution must remain clearly separated from RetroDOS MIT-authored code. No license change to the whole RetroDOS repository is assumed by this lab.
+- use EmulatorJS stable CDN assets rather than nightly/pre-release assets
+- run the `dosbox_pure` core with threads enabled
+- serve the lab with COOP/COEP headers required by `SharedArrayBuffer`
+- keep the game package on a same-origin RetroDOS URL through a server rewrite so threaded cross-origin isolation does not depend on third-party CORS behavior
+- use EmulatorJS public/documented configuration only; do not depend on undocumented internal APIs
+- keep EmulatorJS/DOSBox Pure attribution and licensing separate from RetroDOS-authored MIT code
 
 ## Architecture
 
@@ -42,125 +44,123 @@ The lab has four isolated pieces.
 
 ### 1. Runtime adapter
 
-A thin RetroDOS wrapper around the DOSBox Pure web runtime.
+A thin RetroDOS configuration layer around EmulatorJS/DOSBox Pure.
 
 Responsibilities:
 
-- initialize the WebAssembly runtime
-- load one approved shareware package
-- mount/extract content
-- configure an autostart executable or command
-- expose runtime-ready / game-running / error events
-- expose a small input interface to the UI
+- configure the `dosbox_pure` core
+- enable threaded execution
+- load one approved shareware package through a same-origin URL
+- inject a tiny `AUTORUN.BAT` into the DOS filesystem so the installed shareware package launches `DOOMWEB.BAT`
+- expose visible loading, ready, started and failure states using documented EmulatorJS callbacks
+- keep all runtime-specific globals/configuration out of the production RetroDOS catalog
 
-The rest of RetroDOS must not depend on webЯcade internals directly.
+The main library must not depend directly on EmulatorJS during this lab.
 
 ### 2. Virtual controller
 
-RetroDOS touch controls behave like a normalized game controller, not like a collection of DOM buttons manually dispatching keyboard events.
+The first control path uses EmulatorJS's documented `EJS_VirtualGamepadSettings`, feeding controller inputs into DOSBox Pure rather than attempting to inject keyboard events into a cross-origin iframe.
 
-Normalized controls for the FPS lab:
+The FPS lab needs:
 
-- movement axis / D-pad
-- primary action
+- movement D-pad/zone
+- primary action / fire
 - secondary/use action
-- run modifier
-- strafe modifier
-- Start / Enter
-- Back / Escape
-- optional weapon strip 1–7 only if required for the first DOOM test
+- start/menu controls where practical
+- no separate RetroDOS HTML keyboard layered above the emulator during this first proof
 
-Where possible, the adapter feeds controller state into the same controller path used by the DOSBox Pure/webЯcade runtime. Keyboard injection is fallback-only for menu navigation or missing mappings.
+DOSBox Pure automatic gamepad mapping is allowed to translate the virtual controller into the game's keyboard/mouse controls. If DOOM needs a small explicit mapping adjustment, it belongs in the lab profile rather than the production catalog.
 
 ### 3. Touch UI
+
+The active game remains the visual priority.
 
 Portrait:
 
 - 4:3 game viewport at the top
-- compact joystick on the lower left
-- FIRE / USE / RUN on the lower right
-- small secondary row for menu / optional weapons
-- no js-dos-style floating gray controls
+- EmulatorJS virtual controls positioned below/around the play area where possible
+- RetroDOS header and compact status only
+- no js-dos-style foreign gray control overlay
 
 Landscape:
 
-- 4:3 game viewport centered and as large as possible
-- translucent joystick in the left margin / lower-left edge
-- translucent actions in the right margin / lower-right edge
-- controls never cover the central HUD more than necessary
-- no browser-orientation trick is required for the game to remain usable
+- game viewport receives most of the screen
+- translucent controls remain reachable at the sides/lower edges
+- controls should avoid covering the central HUD more than necessary
+- no browser-orientation trick is required for basic play
 
-The visual language follows RetroDOS: near-black, phosphor green, restrained amber, no decorative computer shell around the active game.
+The visual language follows RetroDOS: near-black, phosphor green, restrained amber, subtle borders and no decorative computer shell around the active game.
 
 ### 4. Game descriptor
 
-Even though the first lab contains only DOOM, runtime settings live in data rather than hard-coded throughout the UI.
-
-Example shape:
+Even though the first lab contains only DOOM, runtime settings live in data.
 
 ```js
 {
   id: "doom-shareware",
   title: "DOOM",
   engine: "dosbox-pure",
-  packageSource: "approved-shareware-source",
-  autoStartPath: "DOOM.EXE",
-  controllerMode: "gamepad",
+  packageUrl: "/games/doom-shareware.zip",
+  upstreamPackage: "https://image.dosgamesarchive.com/games/doom-box.zip",
+  executable: "DOOMWEB.BAT",
   touchProfile: "fps",
   language: "en",
   rights: "shareware"
 }
 ```
 
-`packageSource` is resolved by the lab adapter to one verified redistributable/shareware package URL. The source URL itself is configuration, not UI code.
+The configured upstream package is the installed DOSBox-ready shareware distribution identified by DOS Games Archive. The browser requests only the same-origin `/games/doom-shareware.zip` route; deployment configuration rewrites that route to the upstream package.
 
 This descriptor is the seed of the future catalog/runtime resolver but is not connected to the production catalog during this lab.
 
 ## Content source rule
 
-The repository must not commit commercial game data.
+The repository must not commit commercial game data and does not commit the DOOM ZIP.
 
-For the first lab, use a redistributable/shareware DOOM package from a source whose redistribution terms are verified before wiring it into the runtime. Internet Archive may remain a source of metadata or externally hosted files later, but the lab must not depend on an Archive iframe.
+The first lab references the externally hosted **installed shareware** package. The source remains configurable so it can be replaced without changing the player UI. Internet Archive remains a future metadata/source/fallback option, but this direct-runtime lab must not use an Archive iframe.
 
 ## Error handling
 
 The lab must visibly distinguish:
 
+- browser lacks required cross-origin isolation / `SharedArrayBuffer`
 - package download failure
-- WebAssembly/runtime initialization failure
+- EmulatorJS/DOSBox Pure initialization failure
 - game boot failure
-- unsupported input path
 
-No false `Touch Ready` status is shown unless all success checks pass.
+No false `Touch Ready` status is shown unless all manual success checks pass.
 
 ## Testing
 
-Automated checks should cover:
+Automated checks cover:
 
 - descriptor validation
-- runtime adapter state transitions
-- normalized controller state generation
+- stable EmulatorJS configuration
+- threaded DOSBox Pure configuration
+- required COOP/COEP deployment headers
+- same-origin package route and external rewrite
+- virtual gamepad structural mapping
 - portrait/landscape structural hooks
 - absence of Internet Archive iframe usage in the direct-runtime lab
-- absence of accidental links to mutable Vercel probe aliases
+- absence of mutable Vercel probe aliases
 
 Manual acceptance on Android is required for:
 
 1. page opens
 2. game package downloads
-3. game boots
+3. game boots without manual DOS commands
 4. menu can be entered
 5. player can move forward/back and turn
 6. FIRE works while moving
 7. portrait controls remain reachable
 8. landscape controls remain reachable
-9. no foreign/native control overlay remains visible
+9. no js-dos/native gray control overlay remains visible
 
 ## Integration gate
 
 The engine lab does not modify the main catalog or mark any title Touch Ready.
 
-Only after the manual acceptance list passes should the runtime adapter be integrated into RetroDOS and DOOM receive a `Touch Ready` state. The Internet Archive player remains a separate fallback path for non-certified titles.
+Only after the manual acceptance list passes should this runtime path be integrated into RetroDOS and DOOM receive a `Touch Ready` state. The Internet Archive player remains a separate fallback path for non-certified titles.
 
 ## Deliberate non-goals
 
@@ -170,7 +170,7 @@ To keep this from becoming another multi-week beta, the first pass does not impl
 - ScummVM
 - save synchronization
 - multiple game profiles
-- gamepad configuration UI
+- a custom controller editor
 - Windows 3.1 / Windows 95
 - production catalog integration
 
