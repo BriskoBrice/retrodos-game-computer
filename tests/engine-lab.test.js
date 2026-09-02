@@ -35,3 +35,20 @@ test('deployment enables SharedArrayBuffer and same-origin Doom proxy', () => {
   assert.match(rewriteDump, /doom-shareware\.zip/);
   assert.match(rewriteDump, /image\.dosgamesarchive\.com\/games\/doom-box\.zip/);
 });
+
+test('lab page loads EmulatorJS directly and has mobile hooks', () => {
+  const html = read('experiments/engine-lab/index.html');
+  const app = read('experiments/engine-lab/app.js');
+  const css = read('experiments/engine-lab/styles.css');
+  assert.match(html, /id="game"/);
+  assert.match(html, /id="runtime-status"/);
+  assert.match(html, /config\.js/);
+  assert.match(html, /app\.js/);
+  assert.match(app, /EJS_player/);
+  assert.match(app, /EJS_VirtualGamepadSettings/);
+  assert.match(app, /loader\.js/);
+  assert.match(app, /crossOriginIsolated/);
+  assert.doesNotMatch(html + app, /archive\.org\/embed/i);
+  assert.doesNotMatch(html + app, /retrodos-touch-lab\.vercel\.app/i);
+  assert.match(css, /@media\s*\(orientation:\s*landscape\)/);
+});
