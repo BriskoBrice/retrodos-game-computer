@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/experiments/engine-lab/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/games/doom-shareware.zip",
+      "destination": "https://image.dosgamesarchive.com/games/doom-box.zip"
+    }
+  ]
+}
