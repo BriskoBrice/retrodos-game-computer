@@ -2,51 +2,80 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#020805">
-  <title>RetroDOS Engine Lab // DOOM</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#020504">
+  <meta name="robots" content="noindex,nofollow">
+  <title>RetroDOS Engine Lab — DOOM Touch</title>
+  <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
+  <link rel="stylesheet" href="../touch-lab2/style.css">
+  <style>
+    .boot-overlay{position:fixed;inset:68px 0 0;overflow:auto;z-index:80;display:grid;place-items:center;padding:24px 18px 36px}
+    .boot-overlay.is-gone{display:none}
+    .crt-loader{margin:auto}
+    .engine-note{padding:18px 20px;color:#819084;background:#020403;border-top:1px solid #16251a;font:14px/1.55 system-ui,sans-serif}
+    .engine-note b{color:#c2f8cb}
+    @media (orientation:landscape){.boot-overlay{inset:0;padding:12px}.crt-loader{width:min(720px,92vw);padding:20px 28px}.loader-machine{font-size:44px;margin-bottom:12px}}
+  </style>
+  <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
 </head>
 <body>
-  <main class="lab-shell">
-    <header class="lab-header">
-      <div class="brand-mark" aria-hidden="true">RD</div>
-      <div class="brand-copy">
-        <strong>RetroDOS</strong>
-        <span>ENGINE LAB // RD-8088</span>
-      </div>
-      <div class="lab-badge">DOSBOX PURE</div>
+  <main class="lab" id="lab">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">RD</span><span><b>RetroDOS</b><small>ENGINE LAB // INPUT FIX</small></span></div>
+      <div class="runtime-status"><i></i><span id="statusText">PRÊT</span></div>
+      <button class="mode-button" id="gameModeBtn" type="button">MODE JEU</button>
     </header>
 
-    <section class="runtime-card" aria-labelledby="lab-title">
-      <div class="eyebrow">C:\RETRODOS\LAB&gt;</div>
-      <div class="title-row">
-        <div>
-          <h1 id="lab-title">DOOM</h1>
-          <p>Shareware · 1993 · test tactile Android</p>
+    <section class="player-shell" id="playerShell">
+      <div class="screen-stage" id="screenStage">
+        <div id="dos" class="dos-host" aria-label="Écran DOOM"></div>
+        <div class="game-hud" id="gameHud" aria-label="Commandes RetroDOS">
+          <div class="weapon-dock" id="weaponDock"><span>ARMES</span><button data-tap="49">1</button><button data-tap="50">2</button><button data-tap="51">3</button><button data-tap="52">4</button><button data-tap="53">5</button><button data-tap="54">6</button><button data-tap="55">7</button></div>
+          <div class="left-rail"><div class="joystick" id="joystick" role="application" aria-label="Joystick de déplacement"><div class="joystick-cross"></div><div class="joystick-knob" id="joystickKnob"><span>RD</span></div></div></div>
+          <div class="right-rail">
+            <button class="touch-action fire" data-hold="341"><b>FIRE</b><small>CTRL</small></button>
+            <button class="touch-action use" data-hold="32"><b>USE</b><small>SPACE</small></button>
+            <button class="touch-action run" data-hold="340"><b>RUN</b><small>SHIFT</small></button>
+            <button class="touch-action strafe" data-hold="342"><b>STRAFE</b><small>ALT</small></button>
+          </div>
+          <button class="hud-menu-button" id="hudMenuBtn" type="button">•••</button>
+          <div class="hud-menu" id="hudMenu" hidden>
+            <button data-tap="256">ESC</button><button data-tap="257">ENTER</button><button data-tap="258">MAP</button>
+            <button id="saveBtn" type="button">SAVE</button><button id="muteBtn" type="button">SON ON</button><button id="hideHudBtn" type="button">MASQUER</button><button id="exitModeBtn" type="button">QUITTER MODE JEU</button>
+          </div>
+          <button id="showHudBtn" class="show-hud" type="button" hidden>🎮</button>
         </div>
-        <div id="runtime-status" class="runtime-status" data-state="boot">MOTEUR // VÉRIFICATION</div>
       </div>
 
-      <div class="screen-frame">
-        <div class="screen-glow" aria-hidden="true"></div>
-        <div id="game" aria-label="Lecteur DOOM"></div>
-      </div>
-
-      <div class="system-line">
-        <span><i></i> RD-8088 ONLINE</span>
-        <span>CORE: DOSBOX PURE</span>
-        <span>INPUT: VIRTUAL GAMEPAD</span>
-      </div>
+      <section class="portrait-console" id="portraitConsole">
+        <div class="portrait-head"><div><span>PROFIL</span><b>DOOM FPS</b></div><div><span>INPUT</span><b>90MS DIRECT</b></div><button id="portraitModeBtn" type="button">PAYSAGE ↗</button></div>
+        <div class="portrait-controls"><div class="portrait-joystick-slot" id="portraitJoystickSlot"></div><div class="portrait-actions-slot" id="portraitActionsSlot"></div></div>
+        <div class="portrait-weapons-slot" id="portraitWeaponsSlot"></div>
+        <div class="portrait-tools"><button data-tap="256">ESC</button><button data-tap="257">ENTER</button><button data-tap="258">MAP</button><button id="portraitSaveBtn" type="button">SAUVEGARDER</button><button id="portraitMuteBtn" type="button">SON ON</button></div>
+      </section>
     </section>
 
-    <section class="test-note">
-      <strong>ENGINE TEST 01</strong>
-      <p>Un seul objectif : démarrer DOOM et vérifier déplacement, rotation et tir en tactile. Rien de cette page n'est encore marqué Touch Ready.</p>
-    </section>
+    <div id="bootOverlay" class="boot-overlay">
+      <div class="crt-loader">
+        <div class="loader-kicker">RETRODOS GAME COMPUTER</div>
+        <div class="loader-machine">RD-8088</div>
+        <div class="loader-game">DOOM // SHAREWARE // INPUT LAB</div>
+        <div class="boot-grid">
+          <div><span>SYSTEM CHECK</span><b>OK</b></div>
+          <div><span>GAME DATA</span><b id="dataState">0%</b></div>
+          <div><span>DOS ENGINE</span><b id="engineState">WAIT</b></div>
+          <div><span>TOUCH INPUT</span><b id="inputState">WAIT</b></div>
+        </div>
+        <div class="download-meta"><span id="downloadLabel">Prêt à charger.</span><span id="downloadBytes"></span></div>
+        <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+        <div id="bootCommand" class="boot-command">C:\RETRODOS&gt; LOAD DOOM</div>
+        <button id="startBtn" class="load-button" type="button">CHARGER DOOM</button>
+        <div id="bootError" class="boot-error" hidden></div>
+      </div>
+    </div>
+
+    <section class="engine-note"><b>ENGINE LAB.</b> Même moteur js-dos qui démarrait déjà DOOM sur Android, mais commandes RetroDOS envoyées avec un maintien minimum de 90 ms. Le catalogue reste totalement séparé.</section>
   </main>
-
-  <script src="./config.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
