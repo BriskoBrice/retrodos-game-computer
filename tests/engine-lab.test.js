@@ -7,6 +7,7 @@ const root = path.join(__dirname, '..');
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const html = read('experiments/engine-lab/index.html');
 const app = read('experiments/engine-lab/app.js');
+const adapter = read('experiments/engine-lab/input-adapter.js');
 
 test('engine lab returns to the proven js-dos runtime', () => {
   assert.match(html, /v8\.js-dos\.com\/latest\/js-dos\.js/);
@@ -41,4 +42,19 @@ test('mobile UI keeps boot unclipped and exposes portrait + landscape controls',
   assert.match(html, /id="gameModeBtn"/);
   assert.match(html, /data-tap="49"/);
   assert.match(html, /data-tap="55"/);
+});
+
+test('portrait action rail explicitly accepts pointer input', () => {
+  assert.match(html, /\.portrait-actions-slot \.right-rail\{pointer-events:auto\}/);
+  assert.match(html, /\.portrait-actions-slot \.touch-action\{pointer-events:auto\}/);
+});
+
+test('joystick input adapter uses the bundle native movement map', () => {
+  assert.match(html, /input-adapter\.js[\s\S]*app\.js/);
+  assert.match(adapter, /ci\.config\(\)/);
+  assert.match(adapter, /NippleActivator/);
+  assert.match(adapter, /\[265, movement\.up\]/);
+  assert.match(adapter, /\[264, movement\.down\]/);
+  assert.match(adapter, /\[263, movement\.left\]/);
+  assert.match(adapter, /\[262, movement\.right\]/);
 });
