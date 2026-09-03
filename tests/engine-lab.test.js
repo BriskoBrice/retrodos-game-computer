@@ -7,54 +7,35 @@ const root = path.join(__dirname, '..');
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const html = read('experiments/engine-lab/index.html');
 const app = read('experiments/engine-lab/app.js');
-const adapter = read('experiments/engine-lab/input-adapter.js');
 
-test('engine lab returns to the proven js-dos runtime', () => {
+test('engine lab keeps the proven js-dos runtime and DOOM bundle', () => {
   assert.match(html, /v8\.js-dos\.com\/latest\/js-dos\.js/);
   assert.match(app, /v8\.js-dos\.com\/bundles\/doom\.jsdos/);
   assert.match(app, /player\s*=\s*Dos\(/);
   assert.doesNotMatch(html + app, /archive\.org\/embed/i);
 });
 
-test('DOOM touch keys use the proven mobile key codes', () => {
-  assert.match(app, /UP:\s*265/);
-  assert.match(app, /DOWN:\s*264/);
-  assert.match(app, /LEFT:\s*263/);
-  assert.match(app, /RIGHT:\s*262/);
-  assert.match(html, /data-hold="341"/);
-  assert.match(html, /data-hold="32"/);
-  assert.match(html, /data-hold="340"/);
-  assert.match(html, /data-hold="342"/);
+test('gameplay input belongs to native js-dos layers', () => {
+  assert.match(html, /native-input\.js[\s\S]*app\.js/);
+  assert.match(app, /ci\.config\(\)/);
+  assert.match(app, /hasNativeMobileControls/);
+  assert.doesNotMatch(html + app, /input-adapter\.js|sendKeyEvent|MIN_HOLD_MS|data-hold=|data-tap=|id="joystick"/);
 });
 
-test('key release is serialized and held at least 90ms', () => {
-  assert.match(app, /MIN_HOLD_MS\s*=\s*90/);
-  assert.match(app, /keyChains\s*=\s*new Map/);
-  assert.match(app, /ci\.sendKeyEvent\(code, true\)/);
-  assert.match(app, /await wait\(MIN_HOLD_MS - heldFor\)/);
-  assert.match(app, /ci\.sendKeyEvent\(code, false\)/);
+test('shared CSS no longer blocks the js-dos touch overlay', () => {
+  assert.match(html, /\.lab \.dos-host \.emulator-mouse-overlay\{display:block!important;visibility:visible!important;pointer-events:auto!important\}/);
 });
 
-test('mobile UI keeps boot unclipped and exposes portrait + landscape controls', () => {
+test('mobile UI keeps boot unclipped and preserves fullscreen utilities', () => {
   assert.match(html, /position:fixed;inset:68px 0 0/);
-  assert.match(html, /id="joystick"/);
   assert.match(html, /id="portraitModeBtn"/);
   assert.match(html, /id="gameModeBtn"/);
-  assert.match(html, /data-tap="49"/);
-  assert.match(html, /data-tap="55"/);
+  assert.match(html, /id="saveBtn"/);
+  assert.match(html, /id="muteBtn"/);
 });
 
-test('portrait action rail explicitly accepts pointer input', () => {
-  assert.match(html, /\.portrait-actions-slot \.right-rail\{pointer-events:auto\}/);
-  assert.match(html, /\.portrait-actions-slot \.touch-action\{pointer-events:auto\}/);
-});
-
-test('joystick input adapter uses the bundle native movement map', () => {
-  assert.match(html, /input-adapter\.js[\s\S]*app\.js/);
-  assert.match(adapter, /ci\.config\(\)/);
-  assert.match(adapter, /NippleActivator/);
-  assert.match(adapter, /\[265, movement\.up\]/);
-  assert.match(adapter, /\[264, movement\.down\]/);
-  assert.match(adapter, /\[263, movement\.left\]/);
-  assert.match(adapter, /\[262, movement\.right\]/);
+test('native control skin changes visuals only', () => {
+  assert.match(html, /\.dos-host \.emulator-button\{/);
+  assert.match(html, /\.dos-host \.front\{/);
+  assert.doesNotMatch(html, /\.dos-host \.emulator-button[^}]*pointer-events/);
 });
