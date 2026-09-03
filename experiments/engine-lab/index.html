@@ -14,6 +14,8 @@
     .crt-loader{margin:auto}
     .engine-note{padding:18px 20px;color:#819084;background:#020403;border-top:1px solid #16251a;font:14px/1.55 system-ui,sans-serif}
     .engine-note b{color:#c2f8cb}
+    .portrait-actions-slot .right-rail{pointer-events:auto}
+    .portrait-actions-slot .touch-action{pointer-events:auto}
     @media (orientation:landscape){.boot-overlay{inset:0;padding:12px}.crt-loader{width:min(720px,92vw);padding:20px 28px}.loader-machine{font-size:44px;margin-bottom:12px}}
   </style>
   <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
@@ -48,7 +50,7 @@
       </div>
 
       <section class="portrait-console" id="portraitConsole">
-        <div class="portrait-head"><div><span>PROFIL</span><b>DOOM FPS</b></div><div><span>INPUT</span><b>90MS DIRECT</b></div><button id="portraitModeBtn" type="button">PAYSAGE ↗</button></div>
+        <div class="portrait-head"><div><span>PROFIL</span><b>DOOM FPS</b></div><div><span>INPUT</span><b>90MS + BUNDLE MAP</b></div><button id="portraitModeBtn" type="button">PAYSAGE ↗</button></div>
         <div class="portrait-controls"><div class="portrait-joystick-slot" id="portraitJoystickSlot"></div><div class="portrait-actions-slot" id="portraitActionsSlot"></div></div>
         <div class="portrait-weapons-slot" id="portraitWeaponsSlot"></div>
         <div class="portrait-tools"><button data-tap="256">ESC</button><button data-tap="257">ENTER</button><button data-tap="258">MAP</button><button id="portraitSaveBtn" type="button">SAUVEGARDER</button><button id="portraitMuteBtn" type="button">SON ON</button></div>
@@ -74,8 +76,9 @@
       </div>
     </div>
 
-    <section class="engine-note"><b>ENGINE LAB.</b> Même moteur js-dos qui démarrait déjà DOOM sur Android, mais commandes RetroDOS envoyées avec un maintien minimum de 90 ms. Le catalogue reste totalement séparé.</section>
+    <section class="engine-note"><b>ENGINE LAB.</b> Même moteur js-dos qui démarrait déjà DOOM sur Android, commandes RetroDOS avec maintien minimum de 90 ms et joystick aligné sur le mapping natif du bundle. Le catalogue reste totalement séparé.</section>
   </main>
+  <script src="./input-adapter.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
