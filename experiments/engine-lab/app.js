@@ -2,14 +2,15 @@
   'use strict';
 
   const BUNDLE_URL = 'https://v8.js-dos.com/bundles/doom.jsdos';
-  const nativeInput = window.RetroDOSNativeInput;
+  const bundleTools = window.emulators;
+  const fpsProfile = window.RetroDOSFPSProfile;
   const $ = (q) => document.querySelector(q);
   const els = {
     dos: $('#dos'), boot: $('#bootOverlay'), start: $('#startBtn'), error: $('#bootError'),
     progress: $('#progressBar'), dataState: $('#dataState'), dataLabel: $('#downloadLabel'), bytes: $('#downloadBytes'),
     engineState: $('#engineState'), inputState: $('#inputState'), command: $('#bootCommand'), status: $('#statusText'),
     gameMode: $('#gameModeBtn'), portraitMode: $('#portraitModeBtn'), mirrorMode: $('#gameModeBtnMirror'), exitMode: $('#exitModeBtn'),
-    save: $('#saveBtn'), mute: $('#muteBtn'), nativeBadge: $('#nativeBadge')
+    save: $('#saveBtn'), mute: $('#muteBtn'), profileBadge: $('#profileBadge')
   };
 
   let ci = null;
@@ -18,6 +19,11 @@
   let started = false;
   let muted = false;
   let runtimeWired = false;
+
+  if (bundleTools) {
+    bundleTools.pathPrefix = 'https://v8.js-dos.com/latest/emulators/';
+    bundleTools.pathSuffix = '';
+  }
 
   function formatBytes(value) {
     if (!Number.isFinite(value) || value <= 0) return '0 B';
@@ -30,7 +36,7 @@
     const response = await fetch(url, { cache: 'force-cache' });
     if (!response.ok) throw new Error(`Téléchargement impossible (${response.status})`);
     const total = Number(response.headers.get('content-length')) || 0;
-    if (!response.body) return response.arrayBuffer();
+    if (!response.body) return new Uint8Array(await response.arrayBuffer());
 
     const reader = response.body.getReader();
     const chunks = [];
@@ -59,21 +65,51 @@
     }
     els.progress.style.width = '100%';
     els.dataState.textContent = 'OK';
-    return merged.buffer;
+    return merged;
   }
 
-  async function detectNativeControls() {
+  async function rewriteBundleWithFpsProfile(bundleBytes) {
+    if (!bundleTools?.bundleConfig || !bundleTools?.bundleUpdateConfig) {
+      throw new Error('Outils bundle js-dos indisponibles');
+    }
+    if (!fpsProfile?.applyFpsProfile) {
+      throw new Error('Profil FPS RetroDOS indisponible');
+    }
+
+    els.inputState.textContent = 'CONFIG';
+    els.profileBadge.textContent = 'APPLICATION DU PROFIL FPS…';
+    els.command.textContent = 'C:\\RETRODOS> PATCH INPUT PROFILE';
+
+    const config = await bundleTools.bundleConfig(bundleBytes);
+    if (!config) throw new Error('Configuration du bundle DOOM introuvable');
+
+    fpsProfile.applyFpsProfile(config);
+    const updated = await bundleTools.bundleUpdateConfig(bundleBytes, config);
+    const updatedBytes = updated instanceof Uint8Array ? updated : new Uint8Array(updated);
+
+    const check = await bundleTools.bundleConfig(updatedBytes);
+    if (!fpsProfile.hasFpsProfile(check)) throw new Error('Le profil FPS n’a pas été inscrit dans le bundle');
+
+    els.inputState.textContent = 'FPS ✓';
+    els.inputState.style.color = 'var(--green)';
+    els.profileBadge.textContent = 'RETRODOS FPS PROFILE ✓';
+    els.profileBadge.classList.remove('is-warning');
+    return updatedBytes;
+  }
+
+  async function verifyRuntimeProfile() {
     try {
       const config = await ci.config();
-      const ready = nativeInput?.hasNativeMobileControls(config) === true;
-      els.inputState.textContent = ready ? 'NATIVE ✓' : 'AUCUN';
-      els.inputState.style.color = ready ? 'var(--green)' : 'var(--amber)';
-      els.nativeBadge.textContent = ready ? 'JSDOS NATIVE LAYERS ✓' : 'AUCUN LAYER TACTILE DÉTECTÉ';
-      els.nativeBadge.classList.toggle('is-warning', !ready);
+      const ready = fpsProfile?.hasFpsProfile(config) === true;
+      els.inputState.textContent = ready ? 'FPS ✓' : 'ERREUR';
+      els.inputState.style.color = ready ? 'var(--green)' : 'var(--danger)';
+      els.profileBadge.textContent = ready ? 'RETRODOS FPS PROFILE ✓' : 'PROFIL FPS NON CHARGÉ';
+      els.profileBadge.classList.toggle('is-warning', !ready);
+      if (!ready) throw new Error('Le runtime n’utilise pas le profil FPS RetroDOS');
     } catch (error) {
-      els.inputState.textContent = 'BUNDLE';
-      els.nativeBadge.textContent = 'LAYER BUNDLE — DÉTECTION INDISPONIBLE';
-      console.warn('RetroDOS: lecture de la configuration tactile impossible', error);
+      els.profileBadge.textContent = 'ERREUR PROFIL FPS';
+      els.profileBadge.classList.add('is-warning');
+      console.error(error);
     }
   }
 
@@ -105,7 +141,8 @@
     els.command.textContent = 'C:\\RETRODOS> FETCH DOOM.JSDOS';
 
     try {
-      const bundle = await fetchBundleWithProgress(BUNDLE_URL);
+      const downloaded = await fetchBundleWithProgress(BUNDLE_URL);
+      const bundle = await rewriteBundleWithFpsProfile(downloaded);
       els.engineState.textContent = 'INIT';
       els.command.textContent = 'C:\\RETRODOS> INIT DOS ENGINE';
       bundleObjectUrl = URL.createObjectURL(new Blob([bundle], { type: 'application/octet-stream' }));
@@ -124,8 +161,8 @@
         imageRendering: 'pixelated',
         softFullscreen: false,
         noCursor: true,
-        scaleControls: 0.9,
-        fsChanges: { local: true, urlToKey: async () => 'retrodos-engine-lab-doom' },
+        scaleControls: 0.82,
+        fsChanges: { local: true, urlToKey: async () => 'retrodos-engine-lab-doom-fps-v1' },
         onEvent: async (event, arg) => {
           if (event === 'emu-ready') {
             els.engineState.textContent = 'READY';
@@ -135,16 +172,17 @@
             ci = arg;
             els.status.textContent = 'RUNNING';
             wireRuntimeEvents();
-            await detectNativeControls();
+            await verifyRuntimeProfile();
           }
         }
       });
       player.setNoCloud?.(true);
-      player.setScaleControls?.(0.9);
+      player.setScaleControls?.(0.82);
     } catch (error) {
       started = false;
       els.start.disabled = false;
       els.status.textContent = 'ERREUR';
+      els.inputState.textContent = 'STOP';
       els.error.hidden = false;
       els.error.textContent = `Erreur : ${error.message}. Recharge la page et réessaie.`;
       console.error(error);
