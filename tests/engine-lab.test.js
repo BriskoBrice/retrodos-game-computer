@@ -8,18 +8,22 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const html = read('experiments/engine-lab/index.html');
 const app = read('experiments/engine-lab/app.js');
 
-test('engine lab keeps the proven js-dos runtime and DOOM bundle', () => {
+test('engine lab keeps js-dos and rewrites the DOOM bundle before launch', () => {
+  assert.match(html, /v8\.js-dos\.com\/latest\/emulators\/emulators\.js/);
   assert.match(html, /v8\.js-dos\.com\/latest\/js-dos\.js/);
   assert.match(app, /v8\.js-dos\.com\/bundles\/doom\.jsdos/);
+  assert.match(app, /bundleConfig/);
+  assert.match(app, /bundleUpdateConfig/);
   assert.match(app, /player\s*=\s*Dos\(/);
   assert.doesNotMatch(html + app, /archive\.org\/embed/i);
 });
 
-test('gameplay input belongs to native js-dos layers', () => {
-  assert.match(html, /native-input\.js[\s\S]*app\.js/);
+test('gameplay input is a RetroDOS FPS profile executed by native js-dos layers', () => {
+  assert.match(html, /fps-profile\.js[\s\S]*app\.js/);
+  assert.match(app, /applyFpsProfile/);
+  assert.match(app, /hasFpsProfile/);
   assert.match(app, /ci\.config\(\)/);
-  assert.match(app, /hasNativeMobileControls/);
-  assert.doesNotMatch(html + app, /input-adapter\.js|sendKeyEvent|MIN_HOLD_MS|data-hold=|data-tap=|id="joystick"/);
+  assert.doesNotMatch(html + app, /native-input\.js|input-adapter\.js|sendKeyEvent|MIN_HOLD_MS|data-hold=|data-tap=|id="joystick"/);
 });
 
 test('shared CSS no longer blocks the js-dos touch overlay', () => {
@@ -32,6 +36,7 @@ test('mobile UI keeps boot unclipped and preserves fullscreen utilities', () => 
   assert.match(html, /id="gameModeBtn"/);
   assert.match(html, /id="saveBtn"/);
   assert.match(html, /id="muteBtn"/);
+  assert.match(html, /id="profileBadge"/);
 });
 
 test('native control skin changes visuals only', () => {
