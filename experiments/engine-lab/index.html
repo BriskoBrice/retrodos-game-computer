@@ -5,61 +5,61 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#020504">
   <meta name="robots" content="noindex,nofollow">
-  <title>RetroDOS Engine Lab — DOOM Native Touch</title>
+  <title>RetroDOS Engine Lab — DOOM FPS Profile</title>
   <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
   <link rel="stylesheet" href="../touch-lab2/style.css">
   <style>
     .boot-overlay{position:fixed;inset:68px 0 0;overflow:auto;z-index:80;display:grid;place-items:center;padding:24px 18px 36px}
     .boot-overlay.is-gone{display:none}.crt-loader{margin:auto}
-    .native-panel{padding:14px clamp(12px,3vw,22px) max(18px,env(safe-area-inset-bottom));background:linear-gradient(#071009,#030604);border-bottom:1px solid var(--line)}
-    .native-head{display:flex;align-items:center;gap:14px;margin-bottom:11px}.native-head>div{display:grid;gap:3px}.native-head span{font-size:8px;color:var(--muted)}.native-head b{font-size:11px;color:var(--green2)}
-    .native-head button{margin-left:auto;border:1px solid #665331;background:#0b0e09;color:var(--amber);border-radius:11px;padding:9px 11px;font-size:10px}
-    .native-badge{padding:10px 12px;border:1px solid #31523a;border-radius:10px;background:#07110a;color:var(--green);font-size:10px;letter-spacing:.08em}.native-badge.is-warning{color:var(--amber);border-color:#665331}
-    .native-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}.native-tools button{min-height:42px;border:1px solid #314936;border-radius:9px;background:#08100a;font-size:9px}.native-tools .exit{color:var(--amber)}
+    .profile-panel{padding:14px clamp(12px,3vw,22px) max(18px,env(safe-area-inset-bottom));background:linear-gradient(#071009,#030604);border-bottom:1px solid var(--line)}
+    .profile-head{display:flex;align-items:center;gap:14px;margin-bottom:11px}.profile-head>div{display:grid;gap:3px}.profile-head span{font-size:8px;color:var(--muted)}.profile-head b{font-size:11px;color:var(--green2)}
+    .profile-head button{margin-left:auto;border:1px solid #665331;background:#0b0e09;color:var(--amber);border-radius:11px;padding:9px 11px;font-size:10px}
+    .profile-badge{padding:10px 12px;border:1px solid #31523a;border-radius:10px;background:#07110a;color:var(--green);font-size:10px;letter-spacing:.08em}.profile-badge.is-warning{color:var(--amber);border-color:#665331}
+    .profile-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.profile-tools button{min-height:42px;border:1px solid #314936;border-radius:9px;background:#08100a;font-size:9px}
     .engine-note{padding:18px 20px;color:#819084;background:#020403;border-top:1px solid #16251a;font:14px/1.55 system-ui,sans-serif}.engine-note b{color:#c2f8cb}
     .game-exit{display:none}.game-mode .game-exit{display:block;position:fixed;z-index:70;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));height:42px;padding:0 12px;border:1px solid rgba(233,180,94,.62);border-radius:10px;background:rgba(5,12,7,.78);color:var(--amber);font-size:9px}
 
-    /* The shared Touch Lab stylesheet hides this overlay. Engine Lab now deliberately gives it back to js-dos. */
+    /* touch-lab2 hides the js-dos overlay globally; this lab gives it back to the native engine. */
     .lab .dos-host .emulator-mouse-overlay{display:block!important;visibility:visible!important;pointer-events:auto!important}
 
-    /* Visual skin only: js-dos still owns all pointer/key behaviour. */
+    /* RetroDOS skin only. Input behaviour remains 100% js-dos native. */
     .dos-host .emulator-button-touch-zone{filter:drop-shadow(0 5px 10px rgba(0,0,0,.35))}
-    .dos-host .emulator-button{background:rgba(5,18,10,.78)!important;border-color:rgba(108,255,134,.52)!important;box-shadow:inset 0 0 16px rgba(108,255,134,.07)!important}
-    .dos-host .emulator-button-text{color:#c2f8cb!important;text-shadow:0 0 8px rgba(108,255,134,.22)!important}
+    .dos-host .emulator-button{background:rgba(5,18,10,.80)!important;border-color:rgba(108,255,134,.52)!important;box-shadow:inset 0 0 16px rgba(108,255,134,.07)!important}
+    .dos-host .emulator-button-text{color:#c2f8cb!important;text-shadow:0 0 8px rgba(108,255,134,.22)!important;font-weight:700!important}
     .dos-host .back{background:rgba(20,52,29,.62)!important;border:1px solid rgba(108,255,134,.35)!important}
     .dos-host .front{background:rgba(156,242,174,.86)!important;box-shadow:0 0 18px rgba(108,255,134,.23)!important}
 
-    body.game-mode .native-panel,body.game-mode .engine-note{display:none}.game-mode .screen-stage{position:fixed;inset:0;width:100vw;height:100dvh;max-height:none;aspect-ratio:auto;border:0}.game-mode .dos-host{left:50%;top:50%;right:auto;bottom:auto;width:min(100vw,calc(100dvh * 4 / 3));height:min(100dvh,calc(100vw * 3 / 4));transform:translate(-50%,-50%)}
-    @media (orientation:portrait){.native-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    body.game-mode .profile-panel,body.game-mode .engine-note{display:none}.game-mode .screen-stage{position:fixed;inset:0;width:100vw;height:100dvh;max-height:none;aspect-ratio:auto;border:0}.game-mode .dos-host{left:50%;top:50%;right:auto;bottom:auto;width:min(100vw,calc(100dvh * 4 / 3));height:min(100dvh,calc(100vw * 3 / 4));transform:translate(-50%,-50%)}
+    @media (orientation:portrait){.profile-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (orientation:landscape){.boot-overlay{inset:0;padding:12px}.crt-loader{width:min(720px,92vw);padding:20px 28px}.loader-machine{font-size:44px;margin-bottom:12px}}
   </style>
+  <script src="https://v8.js-dos.com/latest/emulators/emulators.js"></script>
   <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
 </head>
 <body>
   <main class="lab" id="lab">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark">RD</span><span><b>RetroDOS</b><small>ENGINE LAB // NATIVE TOUCH</small></span></div>
+      <div class="brand"><span class="brand-mark">RD</span><span><b>RetroDOS</b><small>ENGINE LAB // FPS PROFILE</small></span></div>
       <div class="runtime-status"><i></i><span id="statusText">PRÊT</span></div>
       <button class="mode-button" id="gameModeBtn" type="button">MODE JEU</button>
     </header>
 
     <section class="player-shell" id="playerShell">
       <div class="screen-stage" id="screenStage">
-        <div id="dos" class="dos-host" aria-label="Écran DOOM et contrôles tactiles natifs js-dos"></div>
+        <div id="dos" class="dos-host" aria-label="Écran DOOM et profil tactile RetroDOS FPS"></div>
       </div>
 
-      <section class="native-panel">
-        <div class="native-head">
-          <div><span>PROFIL</span><b>DOOM FPS</b></div>
-          <div><span>INPUT</span><b>JSDOS NATIVE LAYERS</b></div>
+      <section class="profile-panel">
+        <div class="profile-head">
+          <div><span>JEU</span><b>DOOM SHAREWARE</b></div>
+          <div><span>INPUT</span><b>RETRODOS FPS</b></div>
           <button id="portraitModeBtn" type="button">PAYSAGE ↗</button>
         </div>
-        <div id="nativeBadge" class="native-badge">DÉTECTION DES CONTRÔLES AU DÉMARRAGE…</div>
-        <div class="native-tools">
+        <div id="profileBadge" class="profile-badge">PROFIL FPS PRÊT À ÊTRE APPLIQUÉ</div>
+        <div class="profile-tools">
           <button id="saveBtn" type="button">SAUVEGARDER</button>
           <button id="muteBtn" type="button">SON ON</button>
           <button id="gameModeBtnMirror" type="button">PLEIN ÉCRAN</button>
-          <div></div>
         </div>
       </section>
     </section>
@@ -69,12 +69,12 @@
       <div class="crt-loader">
         <div class="loader-kicker">RETRODOS GAME COMPUTER</div>
         <div class="loader-machine">RD-8088</div>
-        <div class="loader-game">DOOM // SHAREWARE // NATIVE TOUCH LAB</div>
+        <div class="loader-game">DOOM // SHAREWARE // FPS PROFILE</div>
         <div class="boot-grid">
           <div><span>SYSTEM CHECK</span><b>OK</b></div>
           <div><span>GAME DATA</span><b id="dataState">0%</b></div>
           <div><span>DOS ENGINE</span><b id="engineState">WAIT</b></div>
-          <div><span>TOUCH INPUT</span><b id="inputState">WAIT</b></div>
+          <div><span>TOUCH PROFILE</span><b id="inputState">WAIT</b></div>
         </div>
         <div class="download-meta"><span id="downloadLabel">Prêt à charger.</span><span id="downloadBytes"></span></div>
         <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
@@ -84,9 +84,9 @@
       </div>
     </div>
 
-    <section class="engine-note"><b>ENGINE LAB.</b> Aucun joystick RetroDOS ne fabrique maintenant de touches clavier. Le bundle DOOM et js-dos gèrent directement le joystick et les boutons tactiles; RetroDOS ne fait que les afficher et les habiller.</section>
+    <section class="engine-note"><b>FPS PROFILE.</b> RetroDOS remplace les commandes incluses dans le bundle avant lancement : joystick natif 8 directions, FIRE, USE, RUN, STRAFE, MAP, ESC, ENTER et armes 1–7. Aucun tir en touchant l’écran, aucun bouton doublé, aucune couche cachée.</section>
   </main>
-  <script src="./native-input.js"></script>
+  <script src="./fps-profile.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
