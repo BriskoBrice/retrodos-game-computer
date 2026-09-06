@@ -1,92 +1,13 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-  <meta name="theme-color" content="#020504">
-  <meta name="robots" content="noindex,nofollow">
-  <title>RetroDOS Engine Lab — DOOM FPS Profile</title>
-  <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
-  <link rel="stylesheet" href="../touch-lab2/style.css">
-  <style>
-    .boot-overlay{position:fixed;inset:68px 0 0;overflow:auto;z-index:80;display:grid;place-items:center;padding:24px 18px 36px}
-    .boot-overlay.is-gone{display:none}.crt-loader{margin:auto}
-    .profile-panel{padding:14px clamp(12px,3vw,22px) max(18px,env(safe-area-inset-bottom));background:linear-gradient(#071009,#030604);border-bottom:1px solid var(--line)}
-    .profile-head{display:flex;align-items:center;gap:14px;margin-bottom:11px}.profile-head>div{display:grid;gap:3px}.profile-head span{font-size:8px;color:var(--muted)}.profile-head b{font-size:11px;color:var(--green2)}
-    .profile-head button{margin-left:auto;border:1px solid #665331;background:#0b0e09;color:var(--amber);border-radius:11px;padding:9px 11px;font-size:10px}
-    .profile-badge{padding:10px 12px;border:1px solid #31523a;border-radius:10px;background:#07110a;color:var(--green);font-size:10px;letter-spacing:.08em}.profile-badge.is-warning{color:var(--amber);border-color:#665331}
-    .profile-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.profile-tools button{min-height:42px;border:1px solid #314936;border-radius:9px;background:#08100a;font-size:9px}
-    .engine-note{padding:18px 20px;color:#819084;background:#020403;border-top:1px solid #16251a;font:14px/1.55 system-ui,sans-serif}.engine-note b{color:#c2f8cb}
-    .game-exit{display:none}.game-mode .game-exit{display:block;position:fixed;z-index:70;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));height:42px;padding:0 12px;border:1px solid rgba(233,180,94,.62);border-radius:10px;background:rgba(5,12,7,.78);color:var(--amber);font-size:9px}
-
-    /* touch-lab2 hides the js-dos overlay globally; this lab gives it back to the native engine. */
-    .lab .dos-host .emulator-mouse-overlay{display:block!important;visibility:visible!important;pointer-events:auto!important}
-
-    /* RetroDOS skin only. Input behaviour remains 100% js-dos native. */
-    .dos-host .emulator-button-touch-zone{filter:drop-shadow(0 5px 10px rgba(0,0,0,.35))}
-    .dos-host .emulator-button{background:rgba(5,18,10,.80)!important;border-color:rgba(108,255,134,.52)!important;box-shadow:inset 0 0 16px rgba(108,255,134,.07)!important}
-    .dos-host .emulator-button-text{color:#c2f8cb!important;text-shadow:0 0 8px rgba(108,255,134,.22)!important;font-weight:700!important}
-    .dos-host .back{background:rgba(20,52,29,.62)!important;border:1px solid rgba(108,255,134,.35)!important}
-    .dos-host .front{background:rgba(156,242,174,.86)!important;box-shadow:0 0 18px rgba(108,255,134,.23)!important}
-
-    body.game-mode .profile-panel,body.game-mode .engine-note{display:none}.game-mode .screen-stage{position:fixed;inset:0;width:100vw;height:100dvh;max-height:none;aspect-ratio:auto;border:0}.game-mode .dos-host{left:50%;top:50%;right:auto;bottom:auto;width:min(100vw,calc(100dvh * 4 / 3));height:min(100dvh,calc(100vw * 3 / 4));transform:translate(-50%,-50%)}
-    @media (orientation:portrait){.profile-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media (orientation:landscape){.boot-overlay{inset:0;padding:12px}.crt-loader{width:min(720px,92vw);padding:20px 28px}.loader-machine{font-size:44px;margin-bottom:12px}}
-  </style>
-  <script src="https://v8.js-dos.com/latest/emulators/emulators.js"></script>
-  <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#020504"><meta name="robots" content="noindex,nofollow">
+<title>RetroDOS — DOOM Clean Touch</title>
+<link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
+<style>
+:root{--bg:#020504;--panel:#071009;--line:#294431;--green:#6cff86;--green2:#c2f8cb;--amber:#e9b45e;--cream:#e7dcc7;--muted:#819084;--danger:#ff7b72}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:#000;color:var(--cream);font-family:"Courier New",monospace;overscroll-behavior:none}button{font:inherit;color:inherit}.lab{min-height:100dvh;background:linear-gradient(#030704,#010302)}.topbar{height:68px;display:flex;align-items:center;gap:13px;padding:9px 18px;border-bottom:1px solid var(--line);background:#020604;position:relative;z-index:60}.brand{display:flex;align-items:center;gap:12px}.mark{width:50px;height:50px;border:1px solid #416148;border-radius:14px;display:grid;place-items:center;color:var(--green);font-size:20px}.brand b{font-size:22px;letter-spacing:.06em}.brand small{display:block;color:#657268;font-size:8px;letter-spacing:.17em;margin-top:3px}.status{margin-left:auto;color:var(--green);font-size:9px}.mode{border:1px solid #665331;background:#0b0e09;color:var(--amber);border-radius:11px;padding:11px 13px}.stage{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-bottom:1px solid var(--line);overflow:hidden}.dos-host{position:absolute;inset:0;background:#000}.dos-host>div{width:100%!important;height:100%!important}.dos-host canvas,.dos-host video{image-rendering:pixelated;object-fit:contain!important}.dos-host .emulator-mouse-overlay{display:block!important;visibility:visible!important;pointer-events:auto!important}.dos-host .emulator-button{background:rgba(5,18,10,.78)!important;border-color:rgba(108,255,134,.50)!important;box-shadow:inset 0 0 15px rgba(108,255,134,.06)!important}.dos-host .emulator-button-text{color:var(--green2)!important;text-shadow:0 0 8px rgba(108,255,134,.22)!important}.dos-host .back{background:rgba(20,52,29,.62)!important;border:1px solid rgba(108,255,134,.35)!important}.dos-host .front{background:rgba(156,242,174,.82)!important}.panel{padding:14px 18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(#071009,#030604)}.meta{display:flex;align-items:center;gap:22px}.meta div{display:grid;gap:3px}.meta span{font-size:8px;color:var(--muted)}.meta b{font-size:11px;color:var(--green2)}.meta button{margin-left:auto;border:1px solid #665331;background:#0b0e09;color:var(--amber);border-radius:10px;padding:9px 10px}.badge{margin-top:12px;padding:11px 12px;border:1px solid #31523a;border-radius:10px;background:#07110a;color:var(--green);font-size:10px;letter-spacing:.07em}.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.tools button{min-height:46px;border:1px solid #314936;border-radius:10px;background:#08100a;font-size:9px}.note{padding:18px;color:#879489;font:13px/1.55 system-ui,sans-serif}.note b{color:#bcefc4}.boot{position:fixed;inset:68px 0 0;z-index:90;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 40%,#102218,#000 70%);overflow:auto}.boot.is-hidden{opacity:0;pointer-events:none;transition:.4s}.boot.is-gone{display:none}.loader{width:min(620px,94vw);padding:clamp(22px,5vw,40px);border:1px solid #4a7054;border-radius:22px;background:#050b07;box-shadow:0 25px 90px #000}.kicker{font-size:9px;color:var(--muted);letter-spacing:.18em}.machine{margin:6px 0 20px;color:var(--green);font-size:clamp(38px,10vw,68px);font-weight:bold}.game{color:var(--amber);font-size:11px;margin-bottom:16px}.grid{display:grid;gap:7px}.grid div{display:flex;justify-content:space-between;border-bottom:1px dotted #26402d;padding-bottom:4px;font-size:10px}.grid b{color:var(--green);font-weight:normal}.download{display:flex;justify-content:space-between;gap:8px;margin:16px 0 7px;min-height:24px;color:var(--muted);font-size:9px}.track{height:14px;border:1px solid #4f7459;padding:2px}.bar{height:100%;width:0;background:repeating-linear-gradient(90deg,var(--green) 0 11px,transparent 11px 14px)}.command{margin:16px 0;color:var(--green2);font-size:11px}.load{width:100%;padding:14px;border:1px solid #50735a;border-radius:9px;background:#09170d;color:var(--green)}.error{margin-top:10px;color:var(--danger);font-size:10px}.exit{display:none}body.game-mode{overflow:hidden}.game-mode .topbar,.game-mode .panel,.game-mode .note{display:none}.game-mode .stage{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;border:0}.game-mode .dos-host{left:50%;top:50%;right:auto;bottom:auto;width:min(100vw,calc(100dvh * 4 / 3));height:min(100dvh,calc(100vw * 3 / 4));transform:translate(-50%,-50%)}.game-mode .exit{display:block;position:fixed;z-index:100;top:max(9px,env(safe-area-inset-top));right:max(9px,env(safe-area-inset-right));padding:11px;border:1px solid #665331;border-radius:10px;background:rgba(5,12,7,.84);color:var(--amber);font-size:9px}@media (orientation:landscape){.boot{inset:0}.stage{max-height:calc(100dvh - 68px)}body:not(.game-mode) .stage{width:min(100%,calc((100dvh - 68px)*4/3));margin:auto}}@media(max-width:460px){.brand b{font-size:19px}.brand small{font-size:7px}.status{display:none}.tools{grid-template-columns:1fr 1fr}.tools button:last-child{grid-column:1/-1}.meta{gap:12px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js" crossorigin="anonymous"></script>
+<script src="https://v8.js-dos.com/latest/js-dos.js"></script>
 </head>
-<body>
-  <main class="lab" id="lab">
-    <header class="topbar">
-      <div class="brand"><span class="brand-mark">RD</span><span><b>RetroDOS</b><small>ENGINE LAB // FPS PROFILE</small></span></div>
-      <div class="runtime-status"><i></i><span id="statusText">PRÊT</span></div>
-      <button class="mode-button" id="gameModeBtn" type="button">MODE JEU</button>
-    </header>
-
-    <section class="player-shell" id="playerShell">
-      <div class="screen-stage" id="screenStage">
-        <div id="dos" class="dos-host" aria-label="Écran DOOM et profil tactile RetroDOS FPS"></div>
-      </div>
-
-      <section class="profile-panel">
-        <div class="profile-head">
-          <div><span>JEU</span><b>DOOM SHAREWARE</b></div>
-          <div><span>INPUT</span><b>RETRODOS FPS</b></div>
-          <button id="portraitModeBtn" type="button">PAYSAGE ↗</button>
-        </div>
-        <div id="profileBadge" class="profile-badge">PROFIL FPS PRÊT À ÊTRE APPLIQUÉ</div>
-        <div class="profile-tools">
-          <button id="saveBtn" type="button">SAUVEGARDER</button>
-          <button id="muteBtn" type="button">SON ON</button>
-          <button id="gameModeBtnMirror" type="button">PLEIN ÉCRAN</button>
-        </div>
-      </section>
-    </section>
-    <button id="exitModeBtn" class="game-exit" type="button">QUITTER</button>
-
-    <div id="bootOverlay" class="boot-overlay">
-      <div class="crt-loader">
-        <div class="loader-kicker">RETRODOS GAME COMPUTER</div>
-        <div class="loader-machine">RD-8088</div>
-        <div class="loader-game">DOOM // SHAREWARE // FPS PROFILE</div>
-        <div class="boot-grid">
-          <div><span>SYSTEM CHECK</span><b>OK</b></div>
-          <div><span>GAME DATA</span><b id="dataState">0%</b></div>
-          <div><span>DOS ENGINE</span><b id="engineState">WAIT</b></div>
-          <div><span>TOUCH PROFILE</span><b id="inputState">WAIT</b></div>
-        </div>
-        <div class="download-meta"><span id="downloadLabel">Prêt à charger.</span><span id="downloadBytes"></span></div>
-        <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
-        <div id="bootCommand" class="boot-command">C:\RETRODOS&gt; LOAD DOOM</div>
-        <button id="startBtn" class="load-button" type="button">CHARGER DOOM</button>
-        <div id="bootError" class="boot-error" hidden></div>
-      </div>
-    </div>
-
-    <section class="engine-note"><b>FPS PROFILE.</b> RetroDOS remplace les commandes incluses dans le bundle avant lancement : joystick natif 8 directions, FIRE, USE, RUN, STRAFE, MAP, ESC, ENTER et armes 1–7. Aucun tir en touchant l’écran, aucun bouton doublé, aucune couche cachée.</section>
-  </main>
-  <script src="./fps-profile.js"></script>
-  <script src="./app.js"></script>
-</body>
-</html>
+<body><main class="lab"><header class="topbar"><div class="brand"><span class="mark">RD</span><span><b>RetroDOS</b><small>ENGINE LAB // CLEAN FPS PROFILE</small></span></div><span id="statusText" class="status">PRÊT</span><button id="gameModeBtn" class="mode">MODE JEU</button></header><section class="stage"><div id="dos" class="dos-host"></div></section><section class="panel"><div class="meta"><div><span>JEU</span><b>DOOM SHAREWARE</b></div><div><span>INPUT</span><b>RETRODOS FPS</b></div><button id="portraitModeBtn">PAYSAGE ↗</button></div><div id="profileBadge" class="badge">PROFIL TACTILE CHARGÉ PAR RETRODOS</div><div class="tools"><button id="saveBtn">SAUVEGARDER</button><button id="muteBtn">SON ON</button><button id="gameModeBtnMirror">PLEIN ÉCRAN</button></div></section><section class="note"><b>But de ce labo :</b> une seule couche tactile contrôlée par RetroDOS mais exécutée nativement par js-dos. Le ZIP du jeu reste externe et la souris DOOM est désactivée pour éviter le tir en touchant l’écran.</section><button id="exitModeBtn" class="exit">QUITTER</button><div id="bootOverlay" class="boot"><div class="loader"><div class="kicker">RETRODOS GAME COMPUTER</div><div class="machine">RD-8088</div><div class="game">DOOM // SHAREWARE // CLEAN TOUCH</div><div class="grid"><div><span>SYSTEM CHECK</span><b>OK</b></div><div><span>GAME DATA</span><b id="dataState">0%</b></div><div><span>DOS ENGINE</span><b id="engineState">WAIT</b></div><div><span>TOUCH INPUT</span><b id="inputState">WAIT</b></div></div><div class="download"><span id="downloadLabel">Prêt à charger.</span><span id="downloadBytes"></span></div><div class="track"><div id="progressBar" class="bar"></div></div><div id="bootCommand" class="command">C:\RETRODOS&gt; LOAD DOOM</div><button id="startBtn" class="load">CHARGER DOOM</button><div id="bootError" class="error" hidden></div></div></div></main><script src="./fps-profile.js"></script><script src="./source-loader.js"></script><script src="./app.js"></script></body></html>
